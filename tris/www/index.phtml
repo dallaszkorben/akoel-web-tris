@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="http://maps.googleapis.com/maps/api/js"></script>
+	<script type="text/javascript" src="/excursions/js/jquery-1.8.1.js"></script>
+	<script type="text/javascript" src="/excursions/js/iniparse.js"></script>
+
+	<script>
+
+
+		var map;
+		var infoWindows = [];  //For keep track of opened Info Windows
+
+		/**
+		*
+		* It Initializes the MAP
+		* Size, position, markers
+		*
+		*/
+		function initialize() {
+  			var mapProp = {
+			    center:new google.maps.LatLng(47.214688, 19.606562),
+			    zoom:7,
+			    mapTypeId:google.maps.MapTypeId.ROADMAP
+			};
+			map = new google.maps.Map(document.getElementById("googleMap"),mapProp);
+
+			$.ajax({
+				type: "GET",
+				url: "http://localhost/excursions/get_all_points.php",
+				contentType: "text/html",
+				dataType: "xml",
+				async:true,
+				success: getAllPointsSuccess,
+				error: getAllPointsError
+			});
+		}
+
+		/*
+		*
+		* If the gain of the points was successfull
+		* It fill out the markers
+		*
+		*/
+		function getAllPointsSuccess( data, status, req ){
+
+			if( status =="success"){	
+
+				$(data).find("accomodation").each(function(){
+					//alert( $(this).attr("id") );
+					//alert( $(this).find("id").text());
+
+					//Parameters from the DB
+					id = $(this).find("id").text();
+					lat = parseFloat( $(this).find("lat").text() );
+					long = parseFloat( $(this).find("long").text() );
+					name = $(this).find("name").text();
+					startDate = $(this).find("start_date").text()
+					endDate = $(this).find("end_date").text()
+					
+					//Define the marker
+					var marker = new google.maps.Marker({
+						position: new google.maps.LatLng( lat, long ),
+						map: map,
+					});
+
+					//Denines the Info Window
+					var infowindow = new google.maps.InfoWindow({
+						content: 
+							name + "<br>" +
+							startDate + " - " + endDate,
+						id: id		//Extra info - ID
+					});
+
+					infoWindows.push( infowindow );
+
+					//In case of Click on the marker, an Info Window appears
+					google.maps.event.addListener(marker, 'click', function() {
+						
+						//Close all opened Info Window
+						for (var i=0;i<infoWindows.length;i++) {
+							infoWindows[i].close();
+						}
+  						infowindow.open(map,marker);
+					});
+										
+
+				});
+
+			}
+
+		
+		}
+
+		function getAllPointsError( data, status, req ){
+
+			alert( 'Hiba az ajax híváskor: \n' + data.responseText + 'status: ' + status + '\n' + 'req: ' + req.responseText);
+		}
+
+		google.maps.event.addDomListener(window, 'load', initialize);
+
+	</script>
+</head>
+
+<body>
+<div id="googleMap" style="width:650px;height:400px;"></div>
+</body>
+
+</html> 
+
+
+
+
