@@ -1,6 +1,15 @@
 <?php
 
-	$ini = parse_ini_file( "excursions.ini", true );
+//	ini_set('display_errors', 1); //Needs to be here to see error message on the page, otherwise it ignors the error
+
+
+//function exception_error_handler($errno, $errstr, $errfile, $errline ) {
+//    throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
+//}
+//set_error_handler("exception_error_handler");
+
+
+	$ini = parse_ini_file( "tris.ini", true );
 
 	$dbhost = $ini["database"]["dbhost"];
 	$dbport = $ini["database"]["dbport"];
@@ -16,20 +25,24 @@
 	//Append Root
 	$xmlRoot = $xmlResult->appendChild($xmlElement);
 
-
 	// Create DB connection
 	$conn_string = "host=".$dbhost . " port=". $dbport . " dbname=" . $dbname . " user=" . $dbuser . " password=" . $dbpwd;
 	$dbconn = pg_connect($conn_string);
-	if (!$dbconn) {
-
-		echo $result->saveXML();
-		exit;
+	if(!$dbconn){
+		echo "Can not connect to database";
+		exit;	    
 	}
 
+/*	try{
+	    $dbconn = pg_connect($conn_string);
+	}Catch (Exception $e){
+	    echo $e->getMessage();
+	    exit;
+	}
+*/
 	$result = pg_query($dbconn, "SELECT id, name, lat, long, date_start, date_end FROM accomodation");
 	if (!$result) {
-
-		echo $result->saveXML();
+		echo pg_last_error();
 		exit;
 	}
 

@@ -2,8 +2,8 @@
 <html>
 <head>
 	<script src="http://maps.googleapis.com/maps/api/js"></script>
-	<script type="text/javascript" src="/excursions/js/jquery-1.8.1.js"></script>
-	<script type="text/javascript" src="/excursions/js/iniparse.js"></script>
+	<script type="text/javascript" src="/tris/js/jquery-1.8.1.js"></script>
+	<script type="text/javascript" src="/tris/js/iniparse.js"></script>
 
 	<script>
 
@@ -27,7 +27,7 @@
 
 			$.ajax({
 				type: "GET",
-				url: "http://localhost/excursions/get_all_points.php",
+				url: "http://localhost/tris/get_all_points.php",
 				contentType: "text/html",
 				dataType: "xml",
 				async:true,
@@ -94,7 +94,7 @@
 
 		function getAllPointsError( data, status, req ){
 
-			alert( 'Hiba az ajax híváskor: \n' + data.responseText + 'status: ' + status + '\n' + 'req: ' + req.responseText);
+			alert( 'Hiba az ajax híváskor: \n' + data.responseText ); // + '\nstatus: ' + status + '\n' + 'req: ' + req.responseText);
 		}
 
 		google.maps.event.addDomListener(window, 'load', initialize);
