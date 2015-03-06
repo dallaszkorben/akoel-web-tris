@@ -2,11 +2,21 @@
 <html>
 <head>
 	<script src="http://maps.googleapis.com/maps/api/js"></script>
-	<script type="text/javascript" src="/tris/js/jquery-1.8.1.js"></script>
-	<script type="text/javascript" src="/tris/js/iniparse.js"></script>
+	<script type="text/javascript" src="./js/jquery-1.8.1.js"></script>
+	<script type="text/javascript" src="./js/iniparse.js"></script>
+
 
 	<script>
 
+<?php
+
+    $ini = parse_ini_file( "tris.ini", true );
+
+    $webprotocol = $ini["web"]["webprotocol"];
+    $webhost = $ini["web"]["webhost"];
+    $webpath = $ini["web"]["webpath"];
+echo "var urlString = '" . $webprotocol . $webhost . $webpath ."';";
+?>
 
 		var map;
 		var infoWindows = [];  //For keep track of opened Info Windows
@@ -27,7 +37,7 @@
 
 			$.ajax({
 				type: "GET",
-				url: "http://localhost/tris/get_all_points.php",
+				url: urlString + "get_all_points.php",
 				contentType: "text/html",
 				dataType: "xml",
 				async:true,
