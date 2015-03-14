@@ -159,9 +159,18 @@
 						position: new google.maps.LatLng( accomodationLat, accomodationLng ),
 						map: map,
 					});
+					var days = "";
+					$(this).find("day").each(function(){						
+						date = $(this).text();
+						days += date + ", ";
+					});
 
+
+
+
+					
 					var infoWindow = new google.maps.InfoWindow({
-						content: accomodationName + "<br>Cím: " + accomodationAddress + "<br>Típus: " + accomodationType,
+						content: "<b>Szállás</b><br>Név: " + accomodationName + "<br>Cím: " + accomodationAddress + "<br>Típus: " + accomodationType + "<br>Foglalás: " + days, 
 						excursionId: excursionId,
 						tourId: tourId
 					});
