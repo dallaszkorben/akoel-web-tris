@@ -25,6 +25,7 @@
 		
 		var actualExcursionId = null;
 		var actualExcursionName = null;
+		var actualExcursionColor = "#FF0000";
 			
 		/**
 		* It Initializes the MAP
@@ -70,6 +71,7 @@
 					var excursionId = $(this).attr("id");
 					var excursionName = $(this).attr("name");
 					var excursionDateStart = $(this).attr("dateStart");
+					var excursionColor = $(this).attr("color");
 
 					$('#excursionList').append("<tr><td><div id='" + excursionId + "'>" + excursionName + "</div></td><td>" + excursionDateStart.substring(0, 4) + "</td></tr>");
 
@@ -83,6 +85,7 @@
 						
 						actualExcursionId = excursionId;
 						actualExcursionName = excursionName;
+						actualExcursionColor = excursionColor;
 
 						//Check if the excursion appeared
 						excursionObject = excursionArray[ excursionId ];						
@@ -116,7 +119,7 @@
 				});
 			}
 		}
-
+    		
 		/**
 		*
 		* It shows data of the selected excursion
@@ -205,6 +208,8 @@ shownGraphics.push(routePath);
 					var marker = new google.maps.Marker({
 						position: new google.maps.LatLng( accomodationLat, accomodationLng ),
 						map: map,
+						icon: getPinImage(actualExcursionColor),
+			            shadow: getPinShadow()
 					});
 					
 shownGraphics.push(marker);
@@ -257,6 +262,7 @@ excursionArray[ actualExcursionId ] = shownGraphics;
 			alert( 'Hiba az ajax híváskor: \n' + data.responseText ); // + '\nstatus: ' + status + '\n' + 'req: ' + req.responseText);
 		}
 
+		
       	/**
 		* Close all opened Info Window
 		*/	                  	
@@ -265,7 +271,23 @@ excursionArray[ actualExcursionId ] = shownGraphics;
 				infoWindows[i].close();
 			}
       	}
-      	
+
+		function getPinImage( color ){
+			var pinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + color,
+			    new google.maps.Size(21, 34),
+			    new google.maps.Point(0,0),
+		    	new google.maps.Point(10, 34));
+	    	return pinImage;
+		}
+		
+		function getPinShadow(){
+			var pinShadow = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_shadow",
+		    	new google.maps.Size(40, 37),
+		    	new google.maps.Point(0, 0),
+		    	new google.maps.Point(12, 35));
+	    	return pinShadow;
+		}
+		
 		$(function() {
 
 			$("#resize_canvas").resizable({

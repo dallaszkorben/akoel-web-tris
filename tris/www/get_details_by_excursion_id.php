@@ -36,7 +36,13 @@
 	$xmlTours = $xmlExcursion->appendChild( $xmlResult->createElement("tours") );
 		
 	$tour_list = pg_query($dbconn, "
-			SELECT e.date_start as date_start, t.id as id, array_to_json(t.route) as route, t.timestamp as time, tt.name as type, t.day as day 
+			SELECT 
+				e.date_start as date_start, 
+				t.id as id, 
+				array_to_json(t.route) as route, 
+				t.timestamp as time, 
+				tt.name as type, 
+				t.day as day 
 			FROM excursions e, tours t, tour_type tt 
 			WHERE e.id=" . $excursionId . " AND t.excursion_id=e.id AND t.tour_type_id=tt.id"
 	);
