@@ -35,11 +35,12 @@
 	//
 	$xmlTours = $xmlExcursion->appendChild( $xmlResult->createElement("tours") );
 		
+	//array_to_json(t.route) as route,	
 	$tour_list = pg_query($dbconn, "
 			SELECT 
 				e.date_start as date_start, 
 				t.id as id, 
-				array_to_json(t.route) as route, 
+				t.route, 
 				t.timestamp as time, 
 				tt.name as type, 
 				t.day as day 
@@ -60,13 +61,17 @@
 		$xmlTour->setAttribute( "id", $tour_row['id'] );		
 		$xmlTour->setAttribute( "type", getTranslation( $tour_row['type'] ) );
 		
-		$time =  strtotime( $tour_row['date_start']);
-		$time =  strtotime( '+' . ($tour_row['day']-1) . ' day', $time );
-		$date = date( "Y.m.d", $time);
+		$shifted_date = getDayShiftedDate( $tour_row['date_start'], ($tour_row['day']-1) );
 		
-		$xmlTour->setAttribute( "day", $date );
+		//$start_time =  strtotime( $tour_row['date_start']);
+		//$next_time =  strtotime( '+' . ($tour_row['day']-1) . ' day', $start_time );
+		//$date = date( "Y.m.d", $next_time);
+		
+		$xmlTour->setAttribute( "day", $shifted_date );
 			
-		$array = json_decode($tour_row['route']);
+		//$array = json_decode($tour_row['route']);
+		//$array = json_decode( str_replace( '}', ']', str_replace('{', '[', $tour_row['route'] ) ) );
+		$array = getSQLArrayToPHPArray( $tour_row['route'] );
 		foreach( $array as $coord ){
 				
 			//<route>
@@ -82,14 +87,16 @@
 	//
 	$xmlAccomodations = $xmlExcursion->appendChild( $xmlResult->createElement("accomodations") );
 
+	//array_to_json(aa.days) as days, 
+	//array_to_json(a.position) as accomodation_position,
 	$accomodation_list = pg_query($dbconn, "
 			SELECT 
 				e.date_start as date_start, 
 				a.id as accomodation_id, 
-				array_to_json(aa.days) as days, 
+				aa.days as days, 
 				a.name as accomodation_name, 
 				a.address as accomodation_address, 
-				array_to_json(a.position) as accomodation_position, 
+				a.position as accomodation_position, 
 				t.name as accomodation_type
 			FROM excursions e, actual_accomodation aa, accomodations a, accomodation_type t 
 			WHERE e.id=" . $excursionId . " AND e.id=aa.excursion_id AND aa.accomodation_id=a.id AND a.accomodation_type_id=t.id 
@@ -111,19 +118,24 @@
 		$xmlAccomodation->setAttribute( "accomodation_address", $accomodation_row['accomodation_address'] );
 		$xmlAccomodation->setAttribute( "accomodation_type", getTranslation( $accomodation_row['accomodation_type'] ) );
 			
-		$position_array = json_decode($accomodation_row['accomodation_position']);
+		//$position_array = json_decode($accomodation_row['accomodation_position']);
+		//$position_array = json_decode( str_replace( '}', ']', str_replace('{', '[', $accomodation_row['accomodation_position'] ) ) );
+		$position_array = getSQLArrayToPHPArray( $accomodation_row['accomodation_position'] );
 		$xmlAccomodation->setAttribute( "accomodation_lat", $position_array[0] );
 		$xmlAccomodation->setAttribute( "accomodation_lng", $position_array[1] );
 		
-		$days_array = json_decode($accomodation_row['days']);		
+		//$days_array = json_decode($accomodation_row['days']);	
+		//$days_array = json_decode( str_replace( '}', ']', str_replace('{', '[', $accomodation_row['days'] ) ) );
+		$days_array = getSQLArrayToPHPArray( $accomodation_row['days'] );
 		foreach( $days_array as $day ){
 	
-			$time =  strtotime( $accomodation_row['date_start']);
-			$time =  strtotime( '+' . ($day-1) . ' day', $time );				
-			$date_start = date( "Y.m.d", $time);
+			$shifted_date = getDayShiftedDate( $accomodation_row['date_start'], ($day-1) );
+			//$time =  strtotime( $accomodation_row['date_start']);
+			//$time =  strtotime( '+' . ($day-1) . ' day', $time );				
+			//$date_start = date( "Y.m.d", $time);
 			
 			//<day>
-			$xmlDay = $xmlAccomodation->appendChild( $xmlResult->createElement("day", $date_start ) );
+			$xmlDay = $xmlAccomodation->appendChild( $xmlResult->createElement("day", $shifted_date ) );
 				
 		}
 	}	

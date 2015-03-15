@@ -31,4 +31,29 @@
 			return $translated;
 		}
 	}
+	
+	/**
+	 * The SQLArray is not real an array but a STRING having {{}{}} brackets mocking it is an Array
+	 * 
+	 * @param unknown $SQLArray
+	 * @return mixed
+	 */
+	function getSQLArrayToPHPArray( $SQLArray ){
+		return json_decode( str_replace( '}', ']', str_replace('{', '[', $SQLArray ) ) );	
+	}
+	
+	/**
+	 * 
+	 * It gives $DayShiftString days to the $DateString date
+	 * 
+	 * @param unknown $DateString
+	 * @param unknown $DayShiftString
+	 * @return string
+	 */
+	function getDayShiftedDate( $DateString, $DayShiftString ){
+		$start_time =  strtotime( $DateString );
+		$shifted_time =  strtotime( '+' . $DayShiftString . ' day', $start_time );
+		$shifted_date = date( "Y.m.d", $shifted_time);
+		return $shifted_date;
+	}
 ?>

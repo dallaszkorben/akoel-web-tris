@@ -26,7 +26,7 @@
 
 	$xmlExcursions = $xmlResult->appendChild($xmlResult->createElement("excursions"));
 
-	$excursion_list = pg_query($dbconn, "SELECT id, name, date_start, days, color FROM excursions;");
+	$excursion_list = pg_query($dbconn, "SELECT id, name, date_start, days, color FROM excursions ORDER BY date_start;");
 	if (!$excursion_list) {
 		echo pg_last_error();
 		exit;
