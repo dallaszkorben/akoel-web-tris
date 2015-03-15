@@ -1,5 +1,7 @@
 <?php
+	include 'common.php';
 
+	error_reporting(E_ALL);
 	ini_set('display_errors', 1); //Needs to be here to see error message on the page, otherwise it ignors the error
 
 	$ini = parse_ini_file( "tris.ini", true );
@@ -17,6 +19,7 @@
 		echo "Can not connect to database";
 		exit;
 	}
+	//pg_setclientencoding( 'utf-8', $dbconn );
 	
 	//XML preparation
 	$xmlResult = new DOMDocument('1.0', 'UTF-8');

@@ -10,18 +10,11 @@
 
 	<script>
 
-		<!-- generate the "var urlString = '...'" -->
-		<?php
+		<?php include 'common.php'; ?>
 
-    		$ini = parse_ini_file( "tris.ini", true );
-
-    		$webprotocol = $ini["web"]["webprotocol"];
-    		$webhost = $ini["web"]["webhost"];
-    		$webpath = $ini["web"]["webpath"];
-    	
-			echo "var urlString = '" . $webprotocol . $webhost . $webpath ."';";
-		?>
-
+		<!-- On server-side generates the "var webURLString = '...'" -->		
+		<?php echo "var webURLString = '" . getWebURLString() ."';"; ?>	
+		
 		var map;
 		var infoWindows = [];  //For keep track of opened Info Windows
 			
@@ -39,7 +32,7 @@
 		
 			$.ajax({
 				type: "GET",
-				url: urlString + "get_excursion_list.php",
+				url: webURLString + "get_excursion_list.php",
 				contentType: "text/html",
 				dataType: "xml",
 				async:true,
@@ -69,7 +62,7 @@
 						//$( this ).slideUp();
 						$.ajax({
 							type: "GET",
-							url: urlString + "get_details_by_excursion_id.php",
+							url: webURLString + "get_details_by_excursion_id.php",
 							data: { 'excursionid': excursionId, 'valami': "hello" },
 							contentType: "text/html",
 							dataType: "xml",
@@ -124,7 +117,7 @@
 					routePath.setMap(map);
 											
 					var infoWindow = new google.maps.InfoWindow({
-						content: excursionName + " túra<br>Hossza: " + tourLength.toFixed(2) + " m",
+						content: excursionName + " túra<br>Típusa: " + <?php echo getTranslation(tourType)?> + "<br>Hossza: " + tourLength.toFixed(2) + " m",
 						excursionId: excursionId,
 						tourId: tourId
 					});
@@ -164,10 +157,6 @@
 						date = $(this).text();
 						days += date + ", ";
 					});
-
-
-
-
 					
 					var infoWindow = new google.maps.InfoWindow({
 						content: "<b>Szállás</b><br>Név: " + accomodationName + "<br>Cím: " + accomodationAddress + "<br>Típus: " + accomodationType + "<br>Foglalás: " + days, 
@@ -232,8 +221,8 @@
 			<td valign="top">
 				<table border="2" id="excursionList">
 					<tr>
-						<th>Kirándulás</th>
-						<th>Év</th>
+						<th><?php echo getTranslation("label.excursion")?></th>
+						<th><?php echo getTranslation("label.year")?></th>
 					</tr>
 				</table>
 			</td>

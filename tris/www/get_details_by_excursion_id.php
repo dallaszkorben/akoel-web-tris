@@ -1,10 +1,9 @@
 <?php
+	include 'common.php';
 
+	error_reporting(E_ALL);
 	ini_set('display_errors', 1); //Needs to be here to see error message on the page, otherwise it ignors the error
 
-	//POST parameters
-	
-	
 	$ini = parse_ini_file( "tris.ini", true );
 
 	$dbhost = $ini["database"]["dbhost"];
@@ -13,7 +12,7 @@
 	$dbuser = $ini["database"]["dbuser"];
 	$dbpwd = $ini["database"]["dbpwd"];
 
-	//$excursionId = $_POST[ 'excursionid' ];
+	//GET parameters
 	$excursionId = $_GET[ 'excursionid' ];
 	
 	// Create DB connection
@@ -23,6 +22,7 @@
 		echo "Can not connect to database";
 		exit;
 	}
+	//pg_setclientencoding( 'utf-8', $dbconn );
 	
 	//XML preparation
 	$xmlResult = new DOMDocument('1.0', 'UTF-8');
@@ -48,7 +48,7 @@
 		//<tour>
 		$xmlTour = $xmlTours->appendChild( $xmlResult->createElement("tour") );
 		$xmlTour->setAttribute( "id", $tour_row['id'] );
-		$xmlTour->setAttribute( "type", $tour_row['type'] );
+		$xmlTour->setAttribute( "type", getTranslation( $tour_row['type'] ) );
 			
 		$array = json_decode($tour_row['route']);
 		foreach( $array as $coord ){
@@ -81,7 +81,7 @@
 		$xmlAccomodation->setAttribute( "accomodation_id", $accomodation_row['accomodation_id'] );
 		$xmlAccomodation->setAttribute( "accomodation_name", $accomodation_row['accomodation_name'] );
 		$xmlAccomodation->setAttribute( "accomodation_address", $accomodation_row['accomodation_address'] );
-		$xmlAccomodation->setAttribute( "accomodation_type", $accomodation_row['accomodation_type'] );
+		$xmlAccomodation->setAttribute( "accomodation_type", getTranslation( $accomodation_row['accomodation_type'] ) );
 			
 		$position_array = json_decode($accomodation_row['accomodation_position']);
 		$xmlAccomodation->setAttribute( "accomodation_lat", $position_array[0] );
