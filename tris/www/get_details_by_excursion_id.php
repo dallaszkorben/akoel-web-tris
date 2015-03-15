@@ -35,7 +35,11 @@
 	//
 	$xmlTours = $xmlExcursion->appendChild( $xmlResult->createElement("tours") );
 		
-	$tour_list = pg_query($dbconn, "SELECT t.id as id, array_to_json(t.route) as route, t.timestamp as time, tt.name as type FROM tours t, tour_type tt WHERE t.excursion_id=" . $excursionId . " AND t.tour_type_id=tt.id");
+	$tour_list = pg_query($dbconn, "
+			SELECT e.date_start as date_start, t.id as id, array_to_json(t.route) as route, t.timestamp as time, tt.name as type, t.day as day 
+			FROM excursions e, tours t, tour_type tt 
+			WHERE e.id=" . $excursionId . " AND t.excursion_id=e.id AND t.tour_type_id=tt.id"
+	);
 
 	if (!$tour_list) {
 		echo pg_last_error();
@@ -47,8 +51,14 @@
 		
 		//<tour>
 		$xmlTour = $xmlTours->appendChild( $xmlResult->createElement("tour") );
-		$xmlTour->setAttribute( "id", $tour_row['id'] );
+		$xmlTour->setAttribute( "id", $tour_row['id'] );		
 		$xmlTour->setAttribute( "type", getTranslation( $tour_row['type'] ) );
+		
+		$time =  strtotime( $tour_row['date_start']);
+		$time =  strtotime( '+' . ($tour_row['day']-1) . ' day', $time );
+		$date = date( "Y.m.d", $time);
+		
+		$xmlTour->setAttribute( "day", $date );
 			
 		$array = json_decode($tour_row['route']);
 		foreach( $array as $coord ){
@@ -66,7 +76,19 @@
 	//
 	$xmlAccomodations = $xmlExcursion->appendChild( $xmlResult->createElement("accomodations") );
 
-	$accomodation_list = pg_query($dbconn, "SELECT e.date_start as date_start, a.id as accomodation_id, array_to_json(aa.days) as days, a.name as accomodation_name, a.address as accomodation_address, array_to_json(a.position) as accomodation_position, t.name as accomodation_type FROM excursions e, actual_accomodation aa, accomodations a, accomodation_type t WHERE e.id=" . $excursionId . " AND e.id=aa.excursion_id AND aa.accomodation_id=a.id AND a.accomodation_type_id=t.id ORDER BY days[0]");
+	$accomodation_list = pg_query($dbconn, "
+			SELECT 
+				e.date_start as date_start, 
+				a.id as accomodation_id, 
+				array_to_json(aa.days) as days, 
+				a.name as accomodation_name, 
+				a.address as accomodation_address, 
+				array_to_json(a.position) as accomodation_position, 
+				t.name as accomodation_type
+			FROM excursions e, actual_accomodation aa, accomodations a, accomodation_type t 
+			WHERE e.id=" . $excursionId . " AND e.id=aa.excursion_id AND aa.accomodation_id=a.id AND a.accomodation_type_id=t.id 
+			ORDER BY aa.days[0]"
+	);
 	
 	if (!$accomodation_list) {
 		echo pg_last_error();

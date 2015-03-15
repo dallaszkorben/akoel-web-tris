@@ -26,7 +26,7 @@
 
 	$xmlExcursions = $xmlResult->appendChild($xmlResult->createElement("excursions"));
 
-	$excursion_list = pg_query($dbconn, "SELECT id, name, date_start, date_end FROM excursions;");
+	$excursion_list = pg_query($dbconn, "SELECT id, name, date_start, days FROM excursions;");
 	if (!$excursion_list) {
 		echo pg_last_error();
 		exit;
@@ -35,12 +35,17 @@
 	//Through the excursion list
 	while ($row = pg_fetch_assoc($excursion_list)) {
 
+		$start_time =  strtotime( $row['date_start']);
+		$next_time =  strtotime( '+' . ($row['days']-1) . ' day', $start_time );
+		$date = date( "Y.m.d", $next_time);
+		
  		//<excursion>
 		$xmlExcursion = $xmlExcursions->appendChild( $xmlResult->createElement("excursion") );
 		$xmlExcursion->setAttribute( "id", $row['id']);
 		$xmlExcursion->setAttribute( "name", $row['name']);
 		$xmlExcursion->setAttribute( "dateStart", $row['date_start']);
-		$xmlExcursion->setAttribute( "dateEnd", $row['date_end']);
+		$xmlExcursion->setAttribute( "dateEnd", $date);
+		$xmlExcursion->setAttribute( "days", $row['days']);
 
 	}
 	

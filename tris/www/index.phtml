@@ -3,6 +3,9 @@
 <head>
 	<meta charset="UTF-8">
 	
+
+</style>
+
 	<link rel="stylesheet" href="//code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css">
 	<script src="//code.jquery.com/jquery-1.10.2.js"></script>
 	<script src="//code.jquery.com/ui/1.11.3/jquery-ui.js"></script>
@@ -10,13 +13,18 @@
 
 	<script>
 
+	
 		<?php include 'common.php'; ?>
 
 		<!-- On server-side generates the "var webURLString = '...'" -->		
 		<?php echo "var webURLString = '" . getWebURLString() ."';"; ?>	
 		
 		var map;
-		var infoWindows = [];  //For keep track of opened Info Windows
+		var infoWindows = [];  				//For keep track of opened Info Windows
+		var excursionArray = [];
+		
+		var actualExcursionId = null;
+		var actualExcursionName = null;
 			
 		/**
 		* It Initializes the MAP
@@ -26,7 +34,12 @@
 			var mapProp = {
 			    center:new google.maps.LatLng(47.214688, 19.606562),
 			    zoom:7,
-			    mapTypeId:google.maps.MapTypeId.ROADMAP
+			    mapTypeId:google.maps.MapTypeId.ROADMAP,
+			    panControl: false,
+			    zoomControl: false,
+			    mapTypeControl: true,
+			    scaleControl: false,
+			    streetViewControl: true,			    			  			    
 			};
 			map = new google.maps.Map(document.getElementById("map_canvas"),mapProp);
 		
@@ -42,7 +55,9 @@
 		}
 
 		/**
+		*
 		* Get Excursions and show them in table
+		* It fills out the list (only once)
 		*/		
 		function getExcursionListSuccess( data, status, req ){
 
@@ -52,43 +67,77 @@
 				$(data).find("excursion").each(function(){
 
 					//id
-					excursionId = $(this).attr("id");
-					excursionName = $(this).attr("name");
-					excursionDateStart = $(this).attr("dateStart");
-					excursionDateEnd = $(this).attr("dateEnd");
+					var excursionId = $(this).attr("id");
+					var excursionName = $(this).attr("name");
+					var excursionDateStart = $(this).attr("dateStart");
 
 					$('#excursionList').append("<tr><td><div id='" + excursionId + "'>" + excursionName + "</div></td><td>" + excursionDateStart.substring(0, 4) + "</td></tr>");
+
+					//
+					//Kivalasztottam valamelyik kirandulast
+					//
 					$( "#" + excursionId ).click(function() {
-						//$( this ).slideUp();
-						$.ajax({
-							type: "GET",
-							url: webURLString + "get_details_by_excursion_id.php",
-							data: { 'excursionid': excursionId, 'valami': "hello" },
-							contentType: "text/html",
-							dataType: "xml",
-							async:true,
-							success: getDetailsByExcursionIdSuccess,
-							error: getError
-						});
-					});
-					
+
+						//Close all opened infowindow
+						closeAllOpenedInfowindow();
+						
+						actualExcursionId = excursionId;
+						actualExcursionName = excursionName;
+
+						//Check if the excursion appeared
+						excursionObject = excursionArray[ excursionId ];						
+
+						//The excursion does not appear yet
+						if( excursionObject == null ){
+
+							//Make it appear if it is not yet
+							$.ajax({
+								type: "GET",
+								url: webURLString + "get_details_by_excursion_id.php",
+								data: { 'excursionid': excursionId },
+								contentType: "text/html",
+								dataType: "xml",
+								async:true,
+								success: getDetailsByExcursionIdSuccess,
+								error: getError
+							});
+
+						//The excurion must be delete
+						}else{
+
+							for (var i in excursionObject) {
+								excursionObject[i].setMap(null);
+							}
+							excursionArray[ excursionId ] = null;
+														
+						}
+							
+					});					
 				});
 			}
 		}
 
+		/**
+		*
+		* It shows data of the selected excursion
+		*
+		*/
 		function getDetailsByExcursionIdSuccess( data, status, req ){
-
+			
 			if( status =="success"){
 
+var shownGraphics = [];
+				
 				//<tour id="" type="">
 				$(data).find("tour").each(function(){
-					tourId = $(this).attr("id");
-					tourType = $(this).attr("type");
+					var tourId = $(this).attr("id");
+					var tourType = $(this).attr("type");
+					var tourDay = $(this).attr("day");
 
 					//The route path is empty
 					var routePathArray = new Array();
 					var preLatLong = null;
-					var tourLength = 0;
+					var tourLength = 0;					
 				
 					//<route lat="" lng="" time="">
 					$(this).find("route").each(function(){
@@ -115,11 +164,17 @@
 						strokeWeidht: 5
 					});
 					routePath.setMap(map);
-											
+
+shownGraphics.push(routePath);					
+					
+					//Tour infowindow				
 					var infoWindow = new google.maps.InfoWindow({
-						content: excursionName + " túra<br>Típusa: " + <?php echo getTranslation(tourType)?> + "<br>Hossza: " + tourLength.toFixed(2) + " m",
-						excursionId: excursionId,
-						tourId: tourId
+						content:
+							"<center><b><?php echo getTranslation('label.infowindow.tour.title')?></b></center>"+
+							"<br><?php echo getTranslation('label.infowindow.tour.excursion')?> : " + actualExcursionName +
+							"<br><?php echo getTranslation('label.infowindow.tour.day') ?> : " + tourDay +							
+							"<br><?php echo getTranslation('label.infowindow.tour.type')?> : " + <?php echo getTranslation( tourType )?> + 
+							"<br><?php echo getTranslation('label.infowindow.tour.length')?>: " + tourLength.toFixed(2) + " m"
 					});
 
 					infoWindows.push( infoWindow );
@@ -128,18 +183,17 @@
 					google.maps.event.addListener(routePath, 'click', function(event) {
 						mLat = event.latLng.lat();
 	                    mLng = event.latLng.lng();
-	                    
-						//Close all opened Info Window
-						for (var i=0;i<infoWindows.length;i++) {
-							infoWindows[i].close();
-						}
+
+	                  	//Close all opened Info Window
+	                  	closeAllOpenedInfowindow();
+
 						infoWindow.setPosition(event.latLng);
-						infoWindow.open(map)	
+						infoWindow.open(map);
 					});
 					
 				});
 
-				//<accomodation accomodation_id="" accomodation_name="" accomodation_type="" accomodation_address="" accomodation_lat="" accomodation_lng="">
+				//<accomodation accomodation_id="" excursion_name="" accomodation_name="" accomodation_type="" accomodation_address="" accomodation_lat="" accomodation_lng="">
 				$(data).find("accomodation").each(function(){
 					accomodationId = $(this).attr("accomodation_id");
 					accomodationName = $(this).attr("accomodation_name");
@@ -152,31 +206,40 @@
 						position: new google.maps.LatLng( accomodationLat, accomodationLng ),
 						map: map,
 					});
-					var days = "";
-					$(this).find("day").each(function(){						
-						date = $(this).text();
-						days += date + ", ";
-					});
 					
+shownGraphics.push(marker);
+
+					var days = "";
+					$(this).find("day").each(function(){	
+						if( days != "" ){
+							days += ", ";
+						}
+						days += $(this).text();						
+					});
+
+					//Accomodation infowindow
 					var infoWindow = new google.maps.InfoWindow({
-						content: "<b>Szállás</b><br>Név: " + accomodationName + "<br>Cím: " + accomodationAddress + "<br>Típus: " + accomodationType + "<br>Foglalás: " + days, 
-						excursionId: excursionId,
-						tourId: tourId
+						content: 
+							"<center><b><?php echo getTranslation('label.infowindow.accomodation.title')?></b></center>"+
+							"<br><?php echo getTranslation('label.infowindow.accomodatioin.excursionname')?> : " + actualExcursionName +
+							"<br><?php echo getTranslation('label.infowindow.accomodation.name')?>: " + accomodationName + 
+							"<br><?php echo getTranslation('label.infowindow.accomodation.address')?>: " + accomodationAddress + 
+							"<br><?php echo getTranslation('label.infowindow.accomodation.type')?>: " + accomodationType + 
+							"<br><?php echo getTranslation('label.infowindow.accomodation.reserved')?>: " + days						
 					});
 
 					infoWindows.push( infoWindow );
 
 					//In case of Click on the path, an Info Window appears
 					google.maps.event.addListener(marker, 'click', function(event) {
-//						mLat = event.latLng.lat();
-//	                    mLng = event.latLng.lng();
+						mLat = event.latLng.lat();
+	                    mLng = event.latLng.lng();
 	                    
 						//Close all opened Info Window
-						for (var i=0;i<infoWindows.length;i++) {
-							infoWindows[i].close();
-						}
-//						infoWindow.setPosition(event.latLng);
-						infoWindow.open(map)	
+						closeAllOpenedInfowindow();
+
+						infoWindow.setPosition(event.latLng);
+						infoWindow.open(map);
 					});
 
 					//Arrange it to center
@@ -185,6 +248,7 @@
 					
 				});	
 
+excursionArray[ actualExcursionId ] = shownGraphics;				
 							
 			}
 		}
@@ -193,11 +257,20 @@
 			alert( 'Hiba az ajax híváskor: \n' + data.responseText ); // + '\nstatus: ' + status + '\n' + 'req: ' + req.responseText);
 		}
 
+      	/**
+		* Close all opened Info Window
+		*/	                  	
+      	function closeAllOpenedInfowindow(){        
+			for (var i=0;i<infoWindows.length;i++) {
+				infoWindows[i].close();
+			}
+      	}
+      	
 		$(function() {
 
 			$("#resize_canvas").resizable({
 	      		"resize" : function(event,ui) {
-	            	google.maps.event.trigger(map,'resize')
+	            	google.maps.event.trigger(map,'resize');
 	      		}
 			});
 		});
@@ -221,8 +294,8 @@
 			<td valign="top">
 				<table border="2" id="excursionList">
 					<tr>
-						<th><?php echo getTranslation("label.excursion")?></th>
-						<th><?php echo getTranslation("label.year")?></th>
+						<th><?php echo getTranslation("label.table.excursion")?></th>
+						<th><?php echo getTranslation("label.table.year")?></th>
 					</tr>
 				</table>
 			</td>
