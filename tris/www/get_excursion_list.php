@@ -22,9 +22,13 @@
 	//pg_setclientencoding( 'utf-8', $dbconn );
 	
 	//XML preparation
-	$xmlResult = new DOMDocument('1.0', 'UTF-8');
+	/*$xmlResult = new DOMDocument('1.0', 'UTF-8');*/
 
-	$xmlExcursions = $xmlResult->appendChild($xmlResult->createElement("excursions"));
+	//json preparation
+	$excursion_array = array();
+	
+
+//	$xmlExcursions = $xmlResult->appendChild($xmlResult->createElement("excursions"));
 
 	$excursion_list = pg_query($dbconn, "SELECT id, name, date_start, days, color FROM excursions ORDER BY date_start;");
 	if (!$excursion_list) {
@@ -40,16 +44,31 @@
 		$date = date( "Y.m.d", $next_time);
 		
  		//<excursion>
-		$xmlExcursion = $xmlExcursions->appendChild( $xmlResult->createElement("excursion") );
+		/*$xmlExcursion = $xmlExcursions->appendChild( $xmlResult->createElement("excursion") );
 		$xmlExcursion->setAttribute( "id", $row['id']);
 		$xmlExcursion->setAttribute( "name", $row['name']);
 		$xmlExcursion->setAttribute( "dateStart", $row['date_start']);
 		$xmlExcursion->setAttribute( "dateEnd", $date);
 		$xmlExcursion->setAttribute( "days", $row['days']);
-		$xmlExcursion->setAttribute( "color", $row['color']);
-
+		$xmlExcursion->setAttribute( "color", $row['color']);*/
+		
+		$excursion_array[] = array(
+			"id" => $row['id'],
+			"name" => $row['name'],
+			"dateStart" => $row['date_start'],
+			"dateEnd"=> $date,
+			"days"=> $row['days'],
+			"color" => $row['color']				
+		);				
 	}
 	
-	echo $xmlResult->saveXML();
+	$json_array = array( "excursions" => $excursion_array );
+	
+	//echo $xmlResult->saveXML();
+	//echo "<pre>";
+	//var_dump($json_array);
+	//echo "</pre>";
+	
+	echo json_encode( $json_array );	
 
 ?>

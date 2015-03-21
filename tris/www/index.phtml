@@ -3,22 +3,23 @@
 <head>
 	<meta charset="UTF-8">
 	
-
 </style>
 
+ 	<script src="js/common.js"></script> 
+	<link rel="stylesheet" type="text/css" href="css/tris.css">
 	<link rel="stylesheet" href="//code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css">
 	<script src="//code.jquery.com/jquery-1.10.2.js"></script>
 	<script src="//code.jquery.com/ui/1.11.3/jquery-ui.js"></script>
 	<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false&v=3&libraries=geometry"></script>
-
+ 	
 	<script>
 
-	
+		<!-- Common functions -->
 		<?php include 'common.php'; ?>
 
 		<!-- On server-side generates the "var webURLString = '...'" -->		
-		<?php echo "var webURLString = '" . getWebURLString() ."';"; ?>	
-		
+		<?php echo "var webURLString = '" . getWebURLString() ."';"; ?>
+	
 		var map;
 		var infoWindows = [];  				//For keep track of opened Info Windows
 		var excursionArray = [];
@@ -28,10 +29,35 @@
 		var actualExcursionColor = "#FF0000";
 			
 		/**
-		* It Initializes the MAP
+		*
+		* Initializes the MAP
 		* Size, position, markers
+		*
 		*/
 		function initialize() {
+
+			//
+			// Language section
+			//	
+			var language = "<?php echo getActualLanguage(); ?>";
+			imgName = webURLString+"icons/language_" + language + ".png";	
+
+			$('#language_menu').append($('<option/>', { 
+				value: "hu",
+				text : "Magyar" 
+		    }));
+			$('#language_menu').append($('<option/>', { 
+				value: "en",
+				text : "English" 
+		    }));
+		    
+			$('#language_menu').val( language ).change();
+
+			$('#language_menu').change( function(){			
+				setCookie( "<?php echo $cookieLanguage ?>", $(this).val());
+				location.reload();
+			});
+
 			var mapProp = {
 			    center:new google.maps.LatLng(47.214688, 19.606562),
 			    zoom:7,
@@ -48,7 +74,7 @@
 				type: "GET",
 				url: webURLString + "get_excursion_list.php",
 				contentType: "text/html",
-				dataType: "xml",
+				dataType: "json",
 				async:true,
 				success: getExcursionListSuccess,
 				error: getError
@@ -64,8 +90,61 @@
 
 			if( status =="success"){	
 
+				//Megkeresi az "excurions" array-t es vegig megy minden elemen 
+				$.each( data.excursions, function( index, element ){
+
+					var excursionId = element.id;
+					var excursionName = element.name;
+					var excursionDateStart = element.dateStart;
+					var excursionColor = element.color;
+
+					$('#excursionList').append("<tr><td><div id='" + excursionId + "'>" + excursionName + "</div></td><td>" + excursionDateStart.substring(0, 4) + "</td></tr>");
+
+					//
+					//Kivalasztottam valamelyik kirandulast
+					//
+					$( "#" + excursionId ).click(function() {
+
+						//Close all opened infowindow
+						closeAllOpenedInfowindow();
+						
+						actualExcursionId = excursionId;
+						actualExcursionName = excursionName;
+						actualExcursionColor = excursionColor;
+
+						//Check if the excursion appeared
+						excursionObject = excursionArray[ excursionId ];						
+
+						//The excursion does not appear yet
+						if( excursionObject == null ){
+
+							//Make it appear if it is not yet
+							$.ajax({
+								type: "GET",
+								url: webURLString + "get_details_by_excursion_id.php",
+								data: { 'excursionid': excursionId },
+								contentType: "text/html",
+								dataType: "xml",
+								async:true,
+								success: getDetailsByExcursionIdSuccess,
+								error: getError
+							});
+
+						//The excurion must be delete
+						}else{
+
+							for (var i in excursionObject) {
+								excursionObject[i].setMap(null);
+							}
+							excursionArray[ excursionId ] = null;
+														
+						}
+							
+					});		
+				});
+				
 				//<excursion id= "" name="" dateStart="" dateEnd="">
-				$(data).find("excursion").each(function(){
+				/*$(data).find("excursion").each(function(){
 
 					//id
 					var excursionId = $(this).attr("id");
@@ -116,7 +195,7 @@
 						}
 							
 					});					
-				});
+				}); */			
 			}
 		}
     		
@@ -169,14 +248,14 @@ var shownGraphics = [];
 					routePath.setMap(map);
 
 shownGraphics.push(routePath);					
-					
+				
 					//Tour infowindow				
 					var infoWindow = new google.maps.InfoWindow({
 						content:
 							"<center><b><?php echo getTranslation('label.infowindow.tour.title')?></b></center>"+
 							"<br><?php echo getTranslation('label.infowindow.tour.excursion')?> : " + actualExcursionName +
 							"<br><?php echo getTranslation('label.infowindow.tour.day') ?> : " + tourDay +							
-							"<br><?php echo getTranslation('label.infowindow.tour.type')?> : " + <?php echo getTranslation( tourType )?> + 
+							"<br><?php echo getTranslation('label.infowindow.tour.type')?> : " + tourType +
 							"<br><?php echo getTranslation('label.infowindow.tour.length')?>: " + tourLength.toFixed(2) + " m"
 					});
 
@@ -296,7 +375,8 @@ excursionArray[ actualExcursionId ] = shownGraphics;
 	      		}
 			});
 		});
-		
+
+		//If the DOM loaded then starts the initialize
 		google.maps.event.addDomListener(window, 'load', initialize);
 
 	</script>
@@ -304,9 +384,29 @@ excursionArray[ actualExcursionId ] = shownGraphics;
 
 <body>
 
+	<!-- Upper menu line -->
+	<div id="upper_menuline">
+		<div id="upper_menu">
+			<table border="0">
+				<tr >
+					<td>
+						Login
+					</td>
+					<td>
+
+<select id="language_menu">
+</select>				
+					
+					</td>
+				</tr>				
+			</table>
+		</div>
+	</div>
+		
+		
+		
 	<table border="1">
-		<tr>
-			
+		<tr>			
 			<td>
 				<div id="resize_canvas" class="ui-widget-content" style="padding:0px;border:0;width:700px;height:450px;" >
 					<div id="map_canvas" class="ui-widget-content" style="width:100%;height:100%;" ></div>				
@@ -323,6 +423,10 @@ excursionArray[ actualExcursionId ] = shownGraphics;
 			</td>
 		</tr>
 	</table>
+				
+				
+
+	
 </body>
 
 </html> 
