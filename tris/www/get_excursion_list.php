@@ -58,7 +58,7 @@
 			"dateStart" => $row['date_start'],
 			"dateEnd"=> $date,
 			"days"=> $row['days'],
-			"color" => $row['color']				
+			"color" => $row['color'],
 		);				
 	}
 	

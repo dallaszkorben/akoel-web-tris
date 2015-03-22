@@ -22,12 +22,13 @@
 	
 		var map;
 		var infoWindows = [];  				//For keep track of opened Info Windows
-		var excursionArray = [];
+		var excursionArray = {};
 		
 		var actualExcursionId = null;
 		var actualExcursionName = null;
 		var actualExcursionColor = "#FF0000";
-			
+		var actualExcurionsImage = null;
+		
 		/**
 		*
 		* Initializes the MAP
@@ -58,6 +59,12 @@
 				location.reload();
 			});
 
+			$("#resize_canvas").resizable({
+	      		"resize" : function(event,ui) {
+	            	google.maps.event.trigger(map,'resize');
+	      		}
+			});
+			
 			var mapProp = {
 			    center:new google.maps.LatLng(47.214688, 19.606562),
 			    zoom:7,
@@ -98,7 +105,8 @@
 					var excursionDateStart = element.dateStart;
 					var excursionColor = element.color;
 
-					$('#excursionList').append("<tr><td><div id='" + excursionId + "'>" + excursionName + "</div></td><td>" + excursionDateStart.substring(0, 4) + "</td></tr>");
+					//$('#excursion_list').append("<tr><td><div id='" + excursionId + "' shown='false'>" + excursionName + "</div></td><td>" + excursionDateStart + "</td></tr>");
+					$('#excursion_list table').append("<tr id='" + excursionId + "' shown='false'><td>" + excursionName + "</td><td>" + excursionDateStart + "</td></tr>");					
 
 					//
 					//Kivalasztottam valamelyik kirandulast
@@ -126,76 +134,37 @@
 								contentType: "text/html",
 								dataType: "xml",
 								async:true,
+								selectedElement: this,
 								success: getDetailsByExcursionIdSuccess,
 								error: getError
 							});
 
-						//The excurion must be delete
+						//The excurion must be deleted
 						}else{
-
+							
 							for (var i in excursionObject) {
 								excursionObject[i].setMap(null);
 							}
-							excursionArray[ excursionId ] = null;
-														
-						}
+
+/*							$.each(excursionArray, function(key, value){
+							    alert(key + ": " + value +"/n");
+							});
+*/							
 							
+							delete excursionArray[excursionId];						
+							//excursionArray.splice( $.inArray(excursionArray[excursionId], excursionArray), 1 );
+							//excursionArray[ excursionId ] = null;
+
+/*$.each(excursionArray, function(key, value){
+    alert(key + ": " + value +"/n");
+});*/							
+							
+							//Set the CHECKED attribute to FALSE							
+							$(this).attr("shown", "false");							
+							setExcursionDetailsIfNecessary();					
+						}
 					});		
 				});
-				
-				//<excursion id= "" name="" dateStart="" dateEnd="">
-				/*$(data).find("excursion").each(function(){
-
-					//id
-					var excursionId = $(this).attr("id");
-					var excursionName = $(this).attr("name");
-					var excursionDateStart = $(this).attr("dateStart");
-					var excursionColor = $(this).attr("color");
-
-					$('#excursionList').append("<tr><td><div id='" + excursionId + "'>" + excursionName + "</div></td><td>" + excursionDateStart.substring(0, 4) + "</td></tr>");
-
-					//
-					//Kivalasztottam valamelyik kirandulast
-					//
-					$( "#" + excursionId ).click(function() {
-
-						//Close all opened infowindow
-						closeAllOpenedInfowindow();
-						
-						actualExcursionId = excursionId;
-						actualExcursionName = excursionName;
-						actualExcursionColor = excursionColor;
-
-						//Check if the excursion appeared
-						excursionObject = excursionArray[ excursionId ];						
-
-						//The excursion does not appear yet
-						if( excursionObject == null ){
-
-							//Make it appear if it is not yet
-							$.ajax({
-								type: "GET",
-								url: webURLString + "get_details_by_excursion_id.php",
-								data: { 'excursionid': excursionId },
-								contentType: "text/html",
-								dataType: "xml",
-								async:true,
-								success: getDetailsByExcursionIdSuccess,
-								error: getError
-							});
-
-						//The excurion must be delete
-						}else{
-
-							for (var i in excursionObject) {
-								excursionObject[i].setMap(null);
-							}
-							excursionArray[ excursionId ] = null;
-														
-						}
-							
-					});					
-				}); */			
 			}
 		}
     		
@@ -205,10 +174,11 @@
 		*
 		*/
 		function getDetailsByExcursionIdSuccess( data, status, req ){
-			
+		
 			if( status =="success"){
 
-var shownGraphics = [];
+				//Graphical elements (routePath, marker) administration
+				var shownGraphics = [];
 				
 				//<tour id="" type="">
 				$(data).find("tour").each(function(){
@@ -247,16 +217,38 @@ var shownGraphics = [];
 					});
 					routePath.setMap(map);
 
-shownGraphics.push(routePath);					
+					//Keep track of routePath
+					shownGraphics.push(routePath);					
 				
 					//Tour infowindow				
 					var infoWindow = new google.maps.InfoWindow({
 						content:
-							"<center><b><?php echo getTranslation('label.infowindow.tour.title')?></b></center>"+
-							"<br><?php echo getTranslation('label.infowindow.tour.excursion')?> : " + actualExcursionName +
-							"<br><?php echo getTranslation('label.infowindow.tour.day') ?> : " + tourDay +							
-							"<br><?php echo getTranslation('label.infowindow.tour.type')?> : " + tourType +
-							"<br><?php echo getTranslation('label.infowindow.tour.length')?>: " + tourLength.toFixed(2) + " m"
+							"<table class='info-window' border='0'>"+
+								"<tr colspan='1'>"+
+									"<th>" +
+										"<center><b><?php echo getTranslation('label.infowindow.tour.title')?></b></center>"+
+									"</th>" +
+								"</tr>" +
+								"<tr>" +
+									"<td>" +
+										"<table border='0'>"+
+											"<tr>"+
+												"<td><?php echo getTranslation('label.infowindow.tour.excursion')?> : </td><td>" + actualExcursionName + "</td>"+
+											"</tr>"+
+											"<tr>"+
+												"<td><?php echo getTranslation('label.infowindow.tour.day') ?> : </td><td>" + tourDay +	"</td>"+
+											"</tr>"+
+											"<tr>"+
+												"<td><?php echo getTranslation('label.infowindow.tour.type')?> : </td><td>" + tourType + "</td>"+	
+											"</tr>"+
+											"<tr>"+
+												"<td><?php echo getTranslation('label.infowindow.tour.length')?>: </td><td>" + tourLength.toFixed(2) + " m" + "</td>"+	
+											"</tr>"+
+										"</table>"+
+									"</td>" +									
+								"</tr>" +							
+							"</table>"
+							
 					});
 
 					infoWindows.push( infoWindow );
@@ -283,6 +275,7 @@ shownGraphics.push(routePath);
 					accomodationAddress = $(this).attr("accomodation_address");
 					accomodationLat = $(this).attr("accomodation_lat");
 					accomodationLng = $(this).attr("accomodation_lng");
+					accomodationIcon = $(this).attr("accomodation_icon");
 
 					var marker = new google.maps.Marker({
 						position: new google.maps.LatLng( accomodationLat, accomodationLng ),
@@ -290,13 +283,14 @@ shownGraphics.push(routePath);
 						icon: getPinImage(actualExcursionColor),
 			            shadow: getPinShadow()
 					});
-					
-shownGraphics.push(marker);
+
+					//Kepp track of marker
+					shownGraphics.push(marker);
 
 					var days = "";
 					$(this).find("day").each(function(){	
 						if( days != "" ){
-							days += ", ";
+							days += ", <br>";
 						}
 						days += $(this).text();						
 					});
@@ -304,12 +298,38 @@ shownGraphics.push(marker);
 					//Accomodation infowindow
 					var infoWindow = new google.maps.InfoWindow({
 						content: 
-							"<center><b><?php echo getTranslation('label.infowindow.accomodation.title')?></b></center>"+
-							"<br><?php echo getTranslation('label.infowindow.accomodatioin.excursionname')?> : " + actualExcursionName +
-							"<br><?php echo getTranslation('label.infowindow.accomodation.name')?>: " + accomodationName + 
-							"<br><?php echo getTranslation('label.infowindow.accomodation.address')?>: " + accomodationAddress + 
-							"<br><?php echo getTranslation('label.infowindow.accomodation.type')?>: " + accomodationType + 
-							"<br><?php echo getTranslation('label.infowindow.accomodation.reserved')?>: " + days						
+							"<table class='info-window' border='0'>"+
+								"<tr colspan='2'>"+
+									"<th>" +
+										"<center><b><?php echo getTranslation('label.infowindow.accomodation.title')?></b></center>"+
+									"</th>" +
+								"</tr>" +
+								"<tr>" +
+									"<td>" +
+										"<table border='0'>"+
+											"<tr>"+
+												"<td valign='top'><?php echo getTranslation('label.infowindow.accomodatioin.excursionname')?> : </td><td>" + actualExcursionName + "</td>"+		
+											"</tr>"+
+											"<tr>"+
+												"<td valign='top'><?php echo getTranslation('label.infowindow.accomodation.name')?>: </td><td>" + accomodationName + "</td>" +
+											"</tr>"+
+											"<tr>"+
+												"<td valign='top'><?php echo getTranslation('label.infowindow.accomodation.address')?>: </td><td>" + accomodationAddress + "</td>" +
+											"</tr>"+
+											"<tr>"+
+												"<td><?php echo getTranslation('label.infowindow.accomodation.type')?>: </td><td>" + accomodationType + "</td>" +
+											"</tr>"+
+											"<tr>"+
+												"<td valign='top'><?php echo getTranslation('label.infowindow.accomodation.reserved')?>: </td><td>" + days + "</td>" +
+											"</tr>"+
+										"</table>"+			
+									"</td>" +
+									"<td valign='top'>" +
+										"<img src=" + accomodationIcon + ">"+
+									"</td>" +
+								"</tr>" +							
+							"</table>"
+																			
 					});
 
 					infoWindows.push( infoWindow );
@@ -332,8 +352,13 @@ shownGraphics.push(marker);
 					
 				});	
 
-excursionArray[ actualExcursionId ] = shownGraphics;				
-							
+				//graphical elements of the actual excursion goes into an array
+				excursionArray[ actualExcursionId ] = shownGraphics;
+				
+				//Set the CHECKED attribute to TRUE							
+				$(this.selectedElement).attr("shown", "true");
+				setExcursionDetailsIfNecessary();
+											
 			}
 		}
 
@@ -341,7 +366,36 @@ excursionArray[ actualExcursionId ] = shownGraphics;
 			alert( 'Hiba az ajax híváskor: \n' + data.responseText ); // + '\nstatus: ' + status + '\n' + 'req: ' + req.responseText);
 		}
 
-		
+		function setExcursionDetailsIfNecessary(){
+
+			var excursionId = null;
+			
+			//If only One Excursion selected
+			if( Object.keys(excursionArray).length == 1 ){
+
+				//Get the excursion ID
+				$.each(excursionArray, function(key, value){
+					excursionId = key;
+					break;				    
+				});
+				
+				$('#excursion_details').append(
+					"<table border='1'>" +
+					"</table>"
+			    );
+				$('#excursion_details table').append("<tr colspan='2'><td>" + "hello" + "</td></tr>");
+
+				$('#excursion_details table').append("<tr><td>" + "hello" + "</td><td>" + "hello" + "</td></tr>");		
+			    
+				
+			//0 or more than 1 Excursions selected
+			}else{
+
+				//Disappears all details
+				$("#excursion_details table").remove(); 
+			}
+		}
+			
       	/**
 		* Close all opened Info Window
 		*/	                  	
@@ -367,15 +421,6 @@ excursionArray[ actualExcursionId ] = shownGraphics;
 	    	return pinShadow;
 		}
 		
-		$(function() {
-
-			$("#resize_canvas").resizable({
-	      		"resize" : function(event,ui) {
-	            	google.maps.event.trigger(map,'resize');
-	      		}
-			});
-		});
-
 		//If the DOM loaded then starts the initialize
 		google.maps.event.addDomListener(window, 'load', initialize);
 
@@ -393,19 +438,36 @@ excursionArray[ actualExcursionId ] = shownGraphics;
 						Login
 					</td>
 					<td>
-
-<select id="language_menu">
-</select>				
+						<!-- Language selector -->
+						<select id="language_menu"></select>				
 					
 					</td>
 				</tr>				
 			</table>
 		</div>
 	</div>
+	
+	<div id="work_place">
+	
+		<div id="resize_canvas" class="ui-widget-content" style="padding:0px;border:0;width:100%;height:450px;" >
+			<div id="map_canvas" class="ui-widget-content" style="width:100%;height:100%;" ></div>				
+		</div>
+
+		<div id="excursion_list">
+			<table border="0"  cellspacing="0">
+				<tr>
+					<th><?php echo getTranslation("label.table.excursion")?></th>
+					<th><?php echo getTranslation("label.table.date")?></th>
+				</tr>
+			</table>					
+		</div>
 		
-		
-		
-	<table border="1">
+		<div id="excursion_details"></div>
+	
+	
+	</div>	
+<!-- 		
+	<table border="0">
 		<tr>			
 			<td>
 				<div id="resize_canvas" class="ui-widget-content" style="padding:0px;border:0;width:700px;height:450px;" >
@@ -414,16 +476,16 @@ excursionArray[ actualExcursionId ] = shownGraphics;
 			</td>
 
 			<td valign="top">
-				<table border="2" id="excursionList">
+				<table border="0" id="excursion_list" cellspacing="0">
 					<tr>
 						<th><?php echo getTranslation("label.table.excursion")?></th>
-						<th><?php echo getTranslation("label.table.year")?></th>
+						<th><?php echo getTranslation("label.table.date")?></th>
 					</tr>
 				</table>
 			</td>
 		</tr>
 	</table>
-				
+ -->				
 				
 
 	

@@ -11,6 +11,8 @@
 	$dbname = $ini["database"]["dbname"];
 	$dbuser = $ini["database"]["dbuser"];
 	$dbpwd = $ini["database"]["dbpwd"];
+	
+	$accomodationIconPath = $ini["paths"]["accomodation_icons_path"];
 
 	//GET parameters
 	$excursionId = $_GET[ 'excursionid' ];
@@ -97,7 +99,8 @@
 				a.name as accomodation_name, 
 				a.address as accomodation_address, 
 				a.position as accomodation_position, 
-				t.name as accomodation_type
+				t.name as accomodation_type,
+				a.icon_name as accomodation_icon_name
 			FROM excursions e, actual_accomodation aa, accomodations a, accomodation_type t 
 			WHERE e.id=" . $excursionId . " AND e.id=aa.excursion_id AND aa.accomodation_id=a.id AND a.accomodation_type_id=t.id 
 			ORDER BY aa.days[0]"
@@ -117,6 +120,7 @@
 		$xmlAccomodation->setAttribute( "accomodation_name", $accomodation_row['accomodation_name'] );
 		$xmlAccomodation->setAttribute( "accomodation_address", $accomodation_row['accomodation_address'] );
 		$xmlAccomodation->setAttribute( "accomodation_type", getTranslation( $accomodation_row['accomodation_type'] ) );
+		$xmlAccomodation->setAttribute( "accomodation_icon", $accomodationIconPath.$accomodation_row['accomodation_icon_name'] );
 			
 		//$position_array = json_decode($accomodation_row['accomodation_position']);
 		//$position_array = json_decode( str_replace( '}', ']', str_replace('{', '[', $accomodation_row['accomodation_position'] ) ) );
