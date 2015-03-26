@@ -401,7 +401,7 @@
 				//
 				$('#excursion_details table').remove();
 				$('#excursion_details').append(
-						"<table border='1'>" +
+						"<table align='center' border='1'>" +
 						"</table>"
 			    );
 				$('#excursion_details table').append("<tr><th colspan='2' align='center'>" + actualExcursion.excursionName + "</th></tr>");
@@ -412,9 +412,8 @@
 				//
 				// Participant list
 				//
-				var nicknameList = "";
-				var participantList = data.participants;
-				
+				/*var nicknameList = "";
+				var participantList = data.participants;				
 				$(participantList).each(function(){
 					if( nicknameList != "" ){
 						nicknameList += "<br>";
@@ -422,8 +421,22 @@
 					nicknameList += $(this).attr("nickname");
 							
 				});
-
-				$('#excursion_details table').append("<tr><td>" + "Participants" + "</td><td>" + nicknameList + "</td></tr>");
+				*/
+				
+				var nicknameList = "<nav><ul id='nickname_list'>";
+				$.each( data.participants, function( index, element ){
+					//if( nicknameList != "" ){
+					//	nicknameList += "<br>";
+					//}
+					//nicknameList += element.nickname;
+					nicknameList += "<li>" + element.nickname + "</li>";				
+				});
+				nicknameList += "</nav></ul>";
+				
+				$('#excursion_details table').append("<tr><td valign='top'>" + "Participants:" + "</td>" + 
+					"<td valign='top'>" + 
+						nicknameList + 
+					"</td></tr>");
 			}
 		}
 			
@@ -496,30 +509,8 @@
 		<div id="excursion_details"></div>
 	
 	
-	</div>	
-<!-- 		
-	<table border="0">
-		<tr>			
-			<td>
-				<div id="resize_canvas" class="ui-widget-content" style="padding:0px;border:0;width:700px;height:450px;" >
-					<div id="map_canvas" class="ui-widget-content" style="width:100%;height:100%;" ></div>				
-				</div>
-			</td>
-
-			<td valign="top">
-				<table border="0" id="excursion_list" cellspacing="0">
-					<tr>
-						<th><?php echo getTranslation("label.table.excursion")?></th>
-						<th><?php echo getTranslation("label.table.date")?></th>
-					</tr>
-				</table>
-			</td>
-		</tr>
-	</table>
- -->				
-				
-
-	
+	</div>				
+		
 </body>
 
 </html> 

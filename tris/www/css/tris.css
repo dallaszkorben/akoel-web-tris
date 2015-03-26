@@ -82,4 +82,16 @@ table.info-window{
    color: #989800;
 }
 
+#nickname_list{
+	list-style-type: none;
+	height: 80px;
+	overflow:hidden; 
+	overflow-y:auto;
+	border: 1px solid black;
+	
+	border:0px;
+	margin:0px;
+	padding:0px;
+	background-color: #887700;
+}
     
