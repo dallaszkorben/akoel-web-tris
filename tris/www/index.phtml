@@ -4,14 +4,15 @@
 	<meta charset="UTF-8">
 		
  	<script src="js/common.js"></script>
- 	
+ 	<script type="text/javascript" src="jssor/js/jssor.js"></script>
+	<script type="text/javascript" src="jssor/js/jssor.slider.js"></script> 	 	
 	<link rel="stylesheet" type="text/css" href="css/tris.css">
 	
 	<link rel="stylesheet" href="//code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css">
-	<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+ 	<script src="//code.jquery.com/jquery-1.10.2.js"></script> 
 	<script src="//code.jquery.com/ui/1.11.3/jquery-ui.js"></script>
 	<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false&v=3&libraries=geometry"></script>
- 	
+	 	
 	<script>
 
 		<!-- Common functions -->
@@ -104,6 +105,7 @@
 				success: showExcursionListSuccess,
 				error: getError
 			});
+			        
 		}
 
 		/**
@@ -502,25 +504,84 @@
 					);
 				}
 
-				// Picture button
-				elementNumber = 0;
-				var picturelinkList = "<nav><ul class='detail_list' id='picturelink_list'>";
-				$.each( data.picturelinks, function( index, element ){
-					picturelinkList += "<li><a href='" + element.href + "' >" + element.title + " - " + element.nickname + "</a></li>";
-					elementNumber++;				
-				});
-				picturelinkList += "</nav></ul>";
-
-				if( elementNumber > 0 ){
-					$('#excursion_details_container table').append("<tr><td valign='top'>" + "<?php echo getTranslation('label.detail.excursion.picturelinks')?>:" + "</td>" + 
-						"<td valign='top'>" + 
-							picturelinkList + 
-						"</td></tr>"
+				// Picture button				
+				var pictureObjects = data.picturelinks;
+				if( pictureObjects != null ){
+					$('#excursion_details_container table').append(
+						"<tr><td valign='top'>" + "" + "</td>" + 
+						"<td valign='top'><button id='picture_button' type='button'><?php echo getTranslation('label.detail.excursion.picturelinks')?></button></td></tr>"
 					);
+					$("#picture_button").click( function(){
+
+												
+						//$('#slider1_container').removeAttr( 'jssor-slider' ); //Fontos, el kell tavolitani
+						
+						//Kitakaritja a slider kontener tartalmat
+						$('#picture_container div').remove();
+						$('#picture_container').append( "<div id='slider1_container' style='position: relative; width: <?php echo $pictureWidth.'px'; ?>; height: <?php echo $pictureHeight.'px'; ?>; background-color: #000; overflow: hidden; '></div>");
+						$('#slider1_container').append("<div u='slides' style='cursor: move; position: absolute; left: 0px; top: 0px; width: <?php echo $pictureWidth.'px'; ?>; height: <?php echo $pictureHeight.'px'; ?>; overflow: hidden;'></div>");
+						
+						$.each( pictureObjects, function( index, element ){
+
+							$('#slider1_container>div').append(
+								"<div>" +
+									"<img u='image' src='" + element.href + "' />" +
+										
+									"<div u='caption' t='MCLIP|B' t2='B' style='position: absolute; top: <?php echo ($pictureHeight - $pictureCaptionHeight) .'px'; ?>; left: 0px; width: <?php echo $pictureWidth.'px'; ?>; height: <?php echo $pictureCaptionHeight.'px'; ?>;'>" +
+									"<div style='position: absolute; top: 0px; left: 0px; width: <?php echo $pictureWidth.'px'; ?>; height: 50px; background-color: Black; opacity: 0.5; filter: alpha(opacity=50);'></div>" +
+										"<div style='position: absolute; top: 0px; left: 0px; width: <?php echo $pictureWidth.'px'; ?>; height: 50px; color: White; font-size: 16px; font-weight: bold; line-height: 50px; text-align: center;'>" +				                
+											element.title +
+										"</div>" +
+									"</div>" +
+								"</div>"	
+							);
+							
+						});	
+						generateSlider();
+
+
+	
+					});					
 				}
 			}
 		}
-			
+
+		function generateSlider(){
+
+			var options = {
+					$FillMode: 1,                                       //[Optional] The way to fill image in slide, 0 stretch, 1 contain (keep aspect ratio and put all inside slide), 2 cover (keep aspect ratio and cover whole slide), 4 actual size, 5 contain for large image, actual size for small image, default value is 0
+					$AutoPlay: true,                                    //[Optional] Whether to auto play, to enable slideshow, this option must be set to true, default value is false
+					$DragOrientation: 3,                                //[Optional] Orientation to drag slide, 0 no drag, 1 horizental, 2 vertical, 3 either, default value is 1 (Note that the $DragOrientation should be the same as $PlayOrientation when $DisplayPieces is greater than 1, or parking position is not 0)
+					$AutoPlayInterval: 2500,                            //[Optional] Interval (in milliseconds) to go for next slide since the previous stopped if the slider is auto playing, default value is 3000
+					$BulletNavigatorOptions: {                          //[Optional] Options to specify and enable navigator or not
+                        $Class: $JssorBulletNavigator$,                 //[Required] Class to create navigator instance
+                        $ChanceToShow: 2,                               //[Required] 0 Never, 1 Mouse Over, 2 Always
+                        $AutoCenter: 1,                                 //[Optional] Auto center navigator in parent container, 0 None, 1 Horizontal, 2 Vertical, 3 Both, default value is 0
+                        $Steps: 1,                                      //[Optional] Steps to go for each navigation request, default value is 1
+                        $Lanes: 1,                                      //[Optional] Specify lanes to arrange items, default value is 1
+                        $SpacingX: 10,                                  //[Optional] Horizontal space between each item in pixel, default value is 0
+                        $SpacingY: 10,                                  //[Optional] Vertical space between each item in pixel, default value is 0
+                        $Orientation: 1                                 //[Optional] The orientation of the navigator, 1 horizontal, 2 vertical, default value is 1
+                    },
+				};
+				
+				var jssor_slider1 = new $JssorSlider$("slider1_container", options);
+
+				//you can remove responsive code if you don't want the slider scales while window resizes
+				function ScaleSlider() {
+					var parentWidth = jssor_slider1.$Elmt.parentNode.clientWidth;
+					if (parentWidth)
+						jssor_slider1.$ScaleWidth(Math.min(parentWidth, <?php echo $pictureWidth; ?>));
+					else
+						window.setTimeout(ScaleSlider, 30);
+				}
+				ScaleSlider();
+
+				$(window).bind("load", ScaleSlider);
+				$(window).bind("resize", ScaleSlider);
+				$(window).bind("orientationchange", ScaleSlider);
+		}
+		
       	/**
 		* Close all opened Info Window
 		*/	                  	
@@ -591,9 +652,19 @@
 			</div>
 		</div>
 		
-		<div id="pucture_block">
+
 		
-		</div>
+		
+		
+	<div id="picture_container">
+	</div>	
+
+
+    		
+		
+		
+		
+		
 	</div>				
 		
 </body>

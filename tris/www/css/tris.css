@@ -117,6 +117,7 @@ table.info-window{
 #excursion_details_block{
 	position: fixed;
 	bottom: 0px ;
+	right: 0px;
 	/*background-color: #F0F0F0;*/
 }
 #excursion_details_tab{

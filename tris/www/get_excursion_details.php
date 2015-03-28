@@ -102,9 +102,10 @@
 	//
 	$picturelink_array = array();
 	$picturelink_list = pg_query($dbconn, "
-			SELECT pl.title, pl.href, m.nickname
-			FROM picturelinks pl, participants p, members m
-			WHERE pl.participant_id=p.id AND p.member_id=m.id AND p.excursion_id=" . $excursionId );
+			SELECT pic.title, pic.href, m.nickname
+			FROM pictures pic, participants par, members m
+			WHERE pic.participant_id=par.id AND par.member_id=m.id AND par.excursion_id=" . $excursionId .
+			" ORDER BY m.nickname");
 	
 	while ($row = pg_fetch_assoc($picturelink_list)) {
 	
