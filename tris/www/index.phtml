@@ -24,6 +24,10 @@
 		var map;
 		var infoWindows = [];  				//For keep track of opened Info Windows
 		var excursionArray = {};
+
+		var defaultPictureWidth = 300;
+		var defaultPictureHeight = 200;
+		var defaultPictureCaptionHeight = 50;
 		
 		/**
 		*
@@ -127,7 +131,6 @@
 					var excursionDateEnd = element.dateEnd;
 					var excursionColor = element.color;
 
-					//$('#excursion_list').append("<tr><td><div id='" + excursionId + "' shown='false'>" + excursionName + "</div></td><td>" + excursionDateStart + "</td></tr>");
 					$('#excursion_list table').append("<tr id='" + excursionId + "' shown='false'><td>" + excursionName + "</td><td>" + excursionDateStart + "</td></tr>");					
 
 					//
@@ -518,19 +521,18 @@
 						
 						//Kitakaritja a slider kontener tartalmat
 						$('#picture_container div').remove();
-						$('#picture_container').append( "<div id='slider1_container' style='position: relative; width: <?php echo $pictureWidth.'px'; ?>; height: <?php echo $pictureHeight.'px'; ?>; background-color: #000; overflow: hidden; '></div>");
-						$('#slider1_container').append("<div u='slides' style='cursor: move; position: absolute; left: 0px; top: 0px; width: <?php echo $pictureWidth.'px'; ?>; height: <?php echo $pictureHeight.'px'; ?>; overflow: hidden;'></div>");
+						$('#picture_container').append( "<div id='slider1_container' style='position: relative; width: " + defaultPictureWidth + "px; height: " + defaultPictureHeight + "px; background-color: #000; overflow: hidden; '></div>");
+						$('#slider1_container').append("<div u='slides' style='cursor: move; position: absolute; left: 0px; top: 0px; width: " + defaultPictureWidth + "px; height: " + defaultPictureHeight + "px; overflow: hidden;'></div>");
 						
 						$.each( pictureObjects, function( index, element ){
 
 							$('#slider1_container>div').append(
 								"<div>" +
-									"<img u='image' src='" + element.href + "' />" +
-										
-									"<div u='caption' t='MCLIP|B' t2='B' style='position: absolute; top: <?php echo ($pictureHeight - $pictureCaptionHeight) .'px'; ?>; left: 0px; width: <?php echo $pictureWidth.'px'; ?>; height: <?php echo $pictureCaptionHeight.'px'; ?>;'>" +
-									"<div style='position: absolute; top: 0px; left: 0px; width: <?php echo $pictureWidth.'px'; ?>; height: 50px; background-color: Black; opacity: 0.5; filter: alpha(opacity=50);'></div>" +
-										"<div style='position: absolute; top: 0px; left: 0px; width: <?php echo $pictureWidth.'px'; ?>; height: 50px; color: White; font-size: 16px; font-weight: bold; line-height: 50px; text-align: center;'>" +				                
-											element.title +
+									"<img u='image' src='" + element.href + "' />" +	
+									"<div u='caption' t='MCLIP|B' t2='B' style='position: absolute; top: " + (defaultPictureHeight - defaultPictureCaptionHeight ) + "px; left: 0px; width: " + defaultPictureWidth + "px; height: " + defaultPictureHeight + "px;'>" +
+										"<div style='position: absolute; top: 0px; left: 0px; width: " + defaultPictureWidth + "px; height: " + defaultPictureCaptionHeight + "px; background-color: Black; opacity: 0.5; filter: alpha(opacity=50);'></div>" +
+										"<div style='position: absolute; top: 0px; left: 0px; width: " + defaultPictureWidth + "px; height: " + defaultPictureCaptionHeight + "px; color: White; font-size: 16px; font-weight: bold; line-height: 50px; text-align: center;'>" +				                
+											element.title +									
 										"</div>" +
 									"</div>" +
 								"</div>"	
@@ -538,8 +540,6 @@
 							
 						});	
 						generateSlider();
-
-
 	
 					});					
 				}
@@ -547,12 +547,30 @@
 		}
 
 		function generateSlider(){
+			 var _CaptionTransitions = [];
+	            _CaptionTransitions["L"] = { $Duration: 800, x: 0.6, $Easing: { $Left: $JssorEasing$.$EaseInOutSine }, $Opacity: 2 };
+	            _CaptionTransitions["R"] = { $Duration: 800, x: -0.6, $Easing: { $Left: $JssorEasing$.$EaseInOutSine }, $Opacity: 2 };
+	            _CaptionTransitions["T"] = { $Duration: 800, y: 0.6, $Easing: { $Top: $JssorEasing$.$EaseInOutSine }, $Opacity: 2 };
+	            _CaptionTransitions["B"] = { $Duration: 800, y: -0.6, $Easing: { $Top: $JssorEasing$.$EaseInOutSine }, $Opacity: 2 };
+	            _CaptionTransitions["TL"] = { $Duration: 800, x: 0.6, y: 0.6, $Easing: { $Left: $JssorEasing$.$EaseInOutSine, $Top: $JssorEasing$.$EaseInOutSine }, $Opacity: 2 };
+	            _CaptionTransitions["TR"] = { $Duration: 800, x: -0.6, y: 0.6, $Easing: { $Left: $JssorEasing$.$EaseInOutSine, $Top: $JssorEasing$.$EaseInOutSine }, $Opacity: 2 };
+	            _CaptionTransitions["BL"] = { $Duration: 800, x: 0.6, y: -0.6, $Easing: { $Left: $JssorEasing$.$EaseInOutSine, $Top: $JssorEasing$.$EaseInOutSine }, $Opacity: 2 };
+	            _CaptionTransitions["BR"] = { $Duration: 800, x: -0.6, y: -0.6, $Easing: { $Left: $JssorEasing$.$EaseInOutSine, $Top: $JssorEasing$.$EaseInOutSine }, $Opacity: 2 };
+
+	            _CaptionTransitions["MCLIP|B"] = {$Duration:1900,$Clip:8,$Move:true,$Easing:{$Clip:$JssorEasing$.$EaseInOutCubic}};   //{ $Duration: 1600, $Clip: 8, $Move: true, $Easing: $JssorEasing$.$EaseOutExpo };
+	                                             
 
 			var options = {
 					$FillMode: 1,                                       //[Optional] The way to fill image in slide, 0 stretch, 1 contain (keep aspect ratio and put all inside slide), 2 cover (keep aspect ratio and cover whole slide), 4 actual size, 5 contain for large image, actual size for small image, default value is 0
 					$AutoPlay: true,                                    //[Optional] Whether to auto play, to enable slideshow, this option must be set to true, default value is false
 					$DragOrientation: 3,                                //[Optional] Orientation to drag slide, 0 no drag, 1 horizental, 2 vertical, 3 either, default value is 1 (Note that the $DragOrientation should be the same as $PlayOrientation when $DisplayPieces is greater than 1, or parking position is not 0)
 					$AutoPlayInterval: 2500,                            //[Optional] Interval (in milliseconds) to go for next slide since the previous stopped if the slider is auto playing, default value is 3000
+					$CaptionSliderOptions: {                            //[Optional] Options which specifies how to animate caption
+						$Class: $JssorCaptionSlider$,                   //[Required] Class to create instance to animate caption
+						$CaptionTransitions: _CaptionTransitions,       //[Required] An array of caption transitions to play caption, see caption transition section at jssor slideshow transition builder
+						$PlayInMode: 1,                                 //[Optional] 0 None (no play), 1 Chain (goes after main slide), 3 Chain Flatten (goes after main slide and flatten all caption animations), default value is 1
+						$PlayOutMode: 3                                 //[Optional] 0 None (no play), 1 Chain (goes before main slide), 3 Chain Flatten (goes before main slide and flatten all caption animations), default value is 1
+					},					
 					$BulletNavigatorOptions: {                          //[Optional] Options to specify and enable navigator or not
                         $Class: $JssorBulletNavigator$,                 //[Required] Class to create navigator instance
                         $ChanceToShow: 2,                               //[Required] 0 Never, 1 Mouse Over, 2 Always
@@ -571,7 +589,7 @@
 				function ScaleSlider() {
 					var parentWidth = jssor_slider1.$Elmt.parentNode.clientWidth;
 					if (parentWidth)
-						jssor_slider1.$ScaleWidth(Math.min(parentWidth, <?php echo $pictureWidth; ?>));
+						jssor_slider1.$ScaleWidth(Math.min(parentWidth, defaultPictureWidth));
 					else
 						window.setTimeout(ScaleSlider, 30);
 				}

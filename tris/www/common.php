@@ -14,10 +14,6 @@
 	$language_file="translation/translation_" . getActualLanguage() . ".ini";
 	$translation = parse_ini_file( $language_file, true );
 	
-	$pictureWidth = $ini["picture"]["width"];	
-	$pictureHeight = $ini["picture"]["height"];
-	$pictureCaptionHeight = $ini["picture"]["caption_height"];
-	
 	function getActualLanguage(){
 		global $defaultLanguage;
 		global $cookieLanguage;
