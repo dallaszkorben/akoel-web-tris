@@ -82,16 +82,73 @@ table.info-window{
    color: #989800;
 }
 
+
+
+
+
 #nickname_list{
+	height: 30px;
+	border: 1px solid #CCCCCC;
+	font-weight: bold;
+}
+#videolink_list{
+	height: 38px;
+	border: 1px solid #CCCCCC;
+}
+#musiclink_list{
+	height: 38px;
+	border: 1px solid #CCCCCC;
+}
+#picturelink_list{
+	height: 38px;
+	border: 1px solid #CCCCCC;
+}
+.detail_list{
+	/*overflow:hidden;*/
+	/*overflow-y: scroll;*/ 
+	overflow-y: auto;	
+	border: 0px solid black;
+	margin: 0px;
+	padding: 0px;
+	background-color: #DDDDDD;	
 	list-style-type: none;
-	height: 80px;
-	overflow:hidden; 
-	overflow-y:auto;
-	border: 1px solid black;
-	
-	border:0px;
-	margin:0px;
-	padding:0px;
-	background-color: #887700;
 }
     
+#excursion_details_block{
+	position: fixed;
+	bottom: 0px ;
+	/*background-color: #F0F0F0;*/
+}
+#excursion_details_tab{
+	background-color: #F0F0F0;
+	border-top: 1px solid black;
+	border-right: 1px solid black;
+	border-left: 1px solid black;
+	border-top-left-radius: 6px;
+	border-top-right-radius: 6px;
+	padding-right: 10px;
+	padding-left: 10px;
+	width: 100px;
+}
+#excursion_details_tab{
+	cursor: pointer;
+	background-color: #DDDDDD;
+}
+#excursion_details_container{
+	background-color: #DDDDDD;
+	border: 1px solid black;
+	bottom: 10px ;
+	display: none ;
+	left: 20px ;
+	/*width: 100% ;*/
+	width: 400px;
+	height: 300px;	
+}
+#excursion_details_container table th{
+	font-size: 200%;
+	margin: 0px;
+	border: 0px;
+	padding: 0px;
+	padding-bottom: 20px;
+	/*background-color: #555555;*/
+}

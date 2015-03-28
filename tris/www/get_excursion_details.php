@@ -23,12 +23,12 @@
 		exit;
 	}
 	//pg_setclientencoding( 'utf-8', $dbconn );
-
+	
 	//json preparation
 	$participant_array = array();
 
 	//
-	// Resztvevok
+	// Participants
 	//
 	$participant_list = pg_query($dbconn, "
 			SELECT m.nickname
@@ -47,12 +47,95 @@
 		exit;
 	}
 
-	$json_array = array( "participants" => $participant_array );
+	//$json_array[] = array( "participants" => $participant_array );
+
+	//
+	// Video links
+	//
+	$videolink_array = array();
+	$videolink_list = pg_query($dbconn, "
+			SELECT vl.link, vl.name
+			FROM videolinks vl
+			WHERE vl.excursion_id=" . $excursionId );
 	
-	// echo $xmlResult->saveXML();
-	// echo "<pre>";
-	// var_dump($json_array);
-	// echo "</pre>";
+	while ($row = pg_fetch_assoc($videolink_list)) {
+	
+		$videolink_array[] = array(
+				"link" => $row['link'],
+				"name" => $row['name'],
+		);
+	}
+	
+	if (!$videolink_list) {
+		echo pg_last_error();
+		exit;
+	}	
+	
+	//$json_array[] = array( "videolinks" => $videolink_array );
+	
+	//
+	// Music links
+	//
+	$musiclink_array = array();
+	$musiclink_list = pg_query($dbconn, "
+			SELECT ml.link, ml.name
+			FROM musiclinks ml
+			WHERE ml.excursion_id=" . $excursionId );
+	
+	while ($row = pg_fetch_assoc($musiclink_list)) {
+	
+		$musiclink_array[] = array(
+				"link" => $row['link'],
+				"name" => $row['name'],
+		);
+	}
+	
+	if (!$musiclink_list) {
+		echo pg_last_error();
+		exit;
+	}
+	
+	//$json_array[] = array( "musiclinks" => $musiclink_array );
+	
+	//
+	// Picture links
+	//
+	$picturelink_array = array();
+	$picturelink_list = pg_query($dbconn, "
+			SELECT pl.title, pl.href, m.nickname
+			FROM picturelinks pl, participants p, members m
+			WHERE pl.participant_id=p.id AND p.member_id=m.id AND p.excursion_id=" . $excursionId );
+	
+	while ($row = pg_fetch_assoc($picturelink_list)) {
+	
+		$picturelink_array[] = array(
+				"title" => $row['title'],
+				"href" => $row['href'],
+				"nickname" => $row['nickname'],
+		);
+	}
+	
+	if (!$picturelink_list) {
+		echo pg_last_error();
+		exit;
+	}
+	
+	//$json_array[] = array( "musiclinks" => $musiclink_array );
+	
+	
+	//
+	// json osszeallitasa
+	//
+	$json_array = array( 
+		"participants" => $participant_array,
+		"videolinks" => $videolink_array,
+		"musiclinks" => $musiclink_array,
+		"picturelinks" => $picturelink_array,
+	);
+	
+	//echo "<pre>";
+	//var_dump($json_array);
+	//echo "</pre>";
 	
 	echo json_encode( $json_array );	
 

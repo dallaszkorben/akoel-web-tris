@@ -6,6 +6,7 @@
  	<script src="js/common.js"></script>
  	
 	<link rel="stylesheet" type="text/css" href="css/tris.css">
+	
 	<link rel="stylesheet" href="//code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css">
 	<script src="//code.jquery.com/jquery-1.10.2.js"></script>
 	<script src="//code.jquery.com/ui/1.11.3/jquery-ui.js"></script>
@@ -53,24 +54,47 @@
 				location.reload();
 			});
 
+			//
+			// Google map
+			//
 			$("#resize_canvas").resizable({
 	      		"resize" : function(event,ui) {
 	            	google.maps.event.trigger(map,'resize');
 	      		}
 			});
-			
+
 			var mapProp = {
-			    center:new google.maps.LatLng(47.214688, 19.606562),
-			    zoom:7,
-			    mapTypeId:google.maps.MapTypeId.ROADMAP,
-			    panControl: false,
-			    zoomControl: false,
-			    mapTypeControl: true,
-			    scaleControl: false,
-			    streetViewControl: true,			    			  			    
+				    center:new google.maps.LatLng(47.214688, 19.606562),
+				    zoom:7,
+				    mapTypeId:google.maps.MapTypeId.ROADMAP,
+				    panControl: false,
+				    zoomControl: false,
+				    mapTypeControl: true,
+				    scaleControl: false,
+				    streetViewControl: true,			    			  			    
 			};
 			map = new google.maps.Map(document.getElementById("map_canvas"),mapProp);
-		
+		    
+			//
+			// Detail tab
+			//
+			$(document).ready(function( $ ){
+				var container = $( "#excursion_details_container" );
+				$( "#excursion_details_tab" ).click( function( event ){
+					event.preventDefault();
+					if (container.is( ":visible" )){
+						container.slideUp( 500 );
+						$( "#excursion_details_tab" ).text("^");						
+					} else {
+						container.slideDown( 500 );
+						$( "#excursion_details_tab" ).text("v");
+					}
+				});
+			});
+
+			//
+			// Kirandulas lista gyujtese
+			//
 			$.ajax({
 				type: "GET",
 				url: webURLString + "get_excursion_list.php",
@@ -84,8 +108,9 @@
 
 		/**
 		*
-		* Get Excursions and show them in table
-		* It fills out the list (only once)
+		* Tablazatba teszi a megszerzett kirandulasok listajat
+		* Adatait pedig excursionArray-ba helyezi
+		*
 		*/		
 		function showExcursionListSuccess( data, status, req ){
 
@@ -153,7 +178,9 @@
     		
 		/**
 		*
-		* It shows data of the selected excursion
+		* A kivalasztott kirandulas adatait mutatja meg
+		* A szallasok es a kirandulas utvonalak megjelenitese a terkepen
+		* Ha csak 1 kirandulas van kivalasztva, akkor annak reszleteit megjeleniti
 		*
 		*/
 		function showExcursionConnectionsSuccess( data, status, req ){
@@ -355,6 +382,8 @@
 		*
 		* Ha csak 1 kirandulas van kivalasztva, akkor annak reszleteit megjelenitjuk
 		*
+		* Ez meghivodik minden kirandulas elem-re valo kattintas utan
+		*
 		*/
 		function showExcursionDetailsIfNecessary( excursionArray ){
 
@@ -386,12 +415,31 @@
 					success: showExcursionDetailsSuccess,
 					error: getError
 				});
+
+			}else{
+
+				//Torli a reszletes adatokat
+				showExcursionDetailsSuccess( null, null, null );
 			}
 
 		}
-		
+
+		/**
+		*
+		* Egy kirandulas reszleteit jeleniti meg
+		*
+		*/
 		function showExcursionDetailsSuccess( data, status, req ){
-			
+
+			//
+			// Reszletek torlese
+			//
+			$('#excursion_details_container table').remove();
+			$('#excursion_details_container').append(
+					"<table align='center' border='0' width='100%' >" +
+					"</table>"
+		    );
+		    
 			if( status =="success"){
 
 				var actualExcursion = $(this.actualExcursion)[0];
@@ -399,44 +447,77 @@
 				//
 				// Excursion data
 				//
-				$('#excursion_details table').remove();
-				$('#excursion_details').append(
-						"<table align='center' border='1'>" +
-						"</table>"
-			    );
-				$('#excursion_details table').append("<tr><th colspan='2' align='center'>" + actualExcursion.excursionName + "</th></tr>");
+				$('#excursion_details_container table').append("<tr><th colspan='2' align='center'>" + actualExcursion.excursionName + "</th></tr>");
+				$('#excursion_details_container table').append("<tr><td style='white-space:nowrap;'>" + "<?php echo getTranslation('label.detail.excursion.startdate')?>:" + "</td><td>" + actualExcursion.excursionDateStart + "</td></tr>");
+				$('#excursion_details_container table').append("<tr><td style='white-space:nowrap;'>" + "<?php echo getTranslation('label.detail.excursion.enddate')?>:" + "</td><td>" + actualExcursion.excursionDateEnd + "</td></tr>");		
 
-				$('#excursion_details table').append("<tr><td>" + "Start date:" + "</td><td>" + actualExcursion.excursionDateStart + "</td></tr>");
-				$('#excursion_details table').append("<tr><td>" + "End date:" + "</td><td>" + actualExcursion.excursionDateEnd + "</td></tr>");		
-
-				//
-				// Participant list
-				//
-				/*var nicknameList = "";
-				var participantList = data.participants;				
-				$(participantList).each(function(){
-					if( nicknameList != "" ){
-						nicknameList += "<br>";
-					}
-					nicknameList += $(this).attr("nickname");
-							
-				});
-				*/
-				
-				var nicknameList = "<nav><ul id='nickname_list'>";
+				// Nickname
+				var elementNumber = 0;
+				var nicknameList = "<ul class='detail_list' id='nickname_list' >";
 				$.each( data.participants, function( index, element ){
-					//if( nicknameList != "" ){
-					//	nicknameList += "<br>";
-					//}
-					//nicknameList += element.nickname;
-					nicknameList += "<li>" + element.nickname + "</li>";				
+					nicknameList += "<li>" + element.nickname + "</li>";
+					elementNumber++;				
 				});
-				nicknameList += "</nav></ul>";
-				
-				$('#excursion_details table').append("<tr><td valign='top'>" + "Participants:" + "</td>" + 
-					"<td valign='top'>" + 
-						nicknameList + 
-					"</td></tr>");
+				nicknameList += "</ul>";
+
+				if( elementNumber > 0 ){
+					$('#excursion_details_container table').append("<tr><td valign='top'>" + "<?php echo getTranslation('label.detail.excursion.participants')?>:" + "</td>" + 
+						"<td valign='top'>" + 
+							nicknameList + 
+						"</td></tr>"
+					);
+				}
+
+				// Video links
+				elementNumber = 0;
+				var videolinkList = "<nav><ul class='detail_list' id='videolink_list'>";
+				$.each( data.videolinks, function( index, element ){
+					videolinkList += "<li><a href='" + element.link + "' target='_blank' >" + element.name + "</a></li>";
+					elementNumber++;				
+				});
+				videolinkList += "</nav></ul>";
+
+				if( elementNumber > 0 ){
+					$('#excursion_details_container table').append("<tr><td valign='top'>" + "<?php echo getTranslation('label.detail.excursion.videolinks')?>:" + "</td>" + 
+						"<td valign='top'>" + 
+							videolinkList + 
+						"</td></tr>"
+					);
+				}
+
+				// Music links
+				elementNumber = 0;
+				var musiclinkList = "<nav><ul class='detail_list' id='musiclink_list'>";
+				$.each( data.musiclinks, function( index, element ){
+					musiclinkList += "<li><a href='" + element.link + "' target='_blank' >" + element.name + "</a></li>";
+					elementNumber++;				
+				});
+				musiclinkList += "</nav></ul>";
+
+				if( elementNumber > 0 ){
+					$('#excursion_details_container table').append("<tr><td valign='top'>" + "<?php echo getTranslation('label.detail.excursion.musiclinks')?>:" + "</td>" + 
+						"<td valign='top'>" + 
+							musiclinkList + 
+						"</td></tr>"
+					);
+				}
+
+				// Picture button
+				elementNumber = 0;
+				var picturelinkList = "<nav><ul class='detail_list' id='picturelink_list'>";
+				$.each( data.picturelinks, function( index, element ){
+					picturelinkList += "<li><a href='" + element.href + "' >" + element.title + " - " + element.nickname + "</a></li>";
+					elementNumber++;				
+				});
+				picturelinkList += "</nav></ul>";
+
+				if( elementNumber > 0 ){
+					$('#excursion_details_container table').append("<tr><td valign='top'>" + "<?php echo getTranslation('label.detail.excursion.picturelinks')?>:" + "</td>" + 
+						"<td valign='top'>" + 
+							picturelinkList + 
+						"</td></tr>"
+					);
+				}
 			}
 		}
 			
@@ -483,16 +564,14 @@
 					</td>
 					<td>
 						<!-- Language selector -->
-						<select id="language_menu"></select>				
-					
+						<select id="language_menu"></select>					
 					</td>
 				</tr>				
 			</table>
 		</div>
 	</div>
 	
-	<div id="work_place">
-	
+	<div id="work_place">	
 		<div id="resize_canvas" class="ui-widget-content" style="padding:0px;border:0;width:100%;height:450px;" >
 			<div id="map_canvas" class="ui-widget-content" style="width:100%;height:100%;" ></div>				
 		</div>
@@ -506,9 +585,15 @@
 			</table>					
 		</div>
 		
-		<div id="excursion_details"></div>
-	
-	
+		<div id="excursion_details_block">
+			<div id="excursion_details_tab">^</div>
+			<div id="excursion_details_container">			
+			</div>
+		</div>
+		
+		<div id="pucture_block">
+		
+		</div>
 	</div>				
 		
 </body>
