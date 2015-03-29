@@ -85,18 +85,6 @@ table.info-window{
 	border: 1px solid #CCCCCC;
 	font-weight: bold;
 }
-#videolink_list{
-	height: 38px;
-	border: 1px solid #CCCCCC;
-}
-#musiclink_list{
-	height: 38px;
-	border: 1px solid #CCCCCC;
-}
-#picturelink_list{
-	height: 38px;
-	border: 1px solid #CCCCCC;
-}
 .detail_list{
 	/*overflow:hidden;*/
 	/*overflow-y: scroll;*/ 
@@ -133,8 +121,8 @@ table.info-window{
 	display: none ;
 	left: 20px ;
 	/*width: 100% ;*/
-	width: 900px;
-	height: 400px;	
+	width: 750px;
+	height: 368px;	
 }
 #excursion_details_container table{
 	padding: 0px;
