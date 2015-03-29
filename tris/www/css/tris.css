@@ -2,8 +2,9 @@
 
 body {
     background-color: gray;
-	margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px;
-    padding: 0;
+	margin: 0px;
+    padding: 0px;
+    border: 0px;
 }
 
 #upper_menuline{
@@ -12,6 +13,9 @@ body {
     width: 100%;
     height: 40px;
     font-size: 13px;
+    margin: 0px;
+    padding: 0px;
+    border: 0px;
 }
 
 table.info-window{
@@ -20,6 +24,9 @@ table.info-window{
 
 #work_place{
 	position: relative;
+	margin: 0px;
+    padding: 0px;
+    border: 0px;
 }
 
 #upper_menuline table{
@@ -30,29 +37,16 @@ table.info-window{
 
 #excursion_list{
 	position: absolute;
-	 top:0;
+	top:0;
  right:0;
 }
 #excursion_list table{
-/*	border-collapse: collapse;
-*/		
-	margin: 0px;
-    /*margin-top: 0px;
-    margin-bottom: 0px;
-    margin-right: 0px;
-    margin-left: 0px;*/
-    	
-    border: 0px
-/*    border: 2px solid red;*/
-    
 	padding: 0px;
-/*	padding-top: 0px;
-    padding-right: 0px;
-    padding-bottom: 0px;
-    padding-left: 0px;	
-*/    
+	border: 0px;
+	margin: 0px;
+	border-spacing: 0px;
+    border-collapse: collapse;
 }
-
 #excursion_list tr td{
     cursor: pointer;
 }
@@ -87,7 +81,7 @@ table.info-window{
 
 
 #nickname_list{
-	height: 30px;
+	/*height: 30px;*/
 	border: 1px solid #CCCCCC;
 	font-weight: bold;
 }
@@ -117,11 +111,12 @@ table.info-window{
 #excursion_details_block{
 	position: fixed;
 	bottom: 0px ;
-	right: 0px;
+	left: 0px;
 	/*background-color: #F0F0F0;*/
 }
 #excursion_details_tab{
-	background-color: #F0F0F0;
+	cursor: pointer;
+	background-color: #DDDDDD;
 	border-top: 1px solid black;
 	border-right: 1px solid black;
 	border-left: 1px solid black;
@@ -131,10 +126,6 @@ table.info-window{
 	padding-left: 10px;
 	width: 100px;
 }
-#excursion_details_tab{
-	cursor: pointer;
-	background-color: #DDDDDD;
-}
 #excursion_details_container{
 	background-color: #DDDDDD;
 	border: 1px solid black;
@@ -142,14 +133,25 @@ table.info-window{
 	display: none ;
 	left: 20px ;
 	/*width: 100% ;*/
-	width: 400px;
-	height: 300px;	
+	width: 900px;
+	height: 400px;	
 }
-#excursion_details_container table th{
+#excursion_details_container table{
+	padding: 0px;
+	border: 0px;
+	margin: 0px;
+	border-spacing: 0px;
+    border-collapse: collapse;
+    /*background-color: red;*/
+}
+#excursion_details_title{
 	font-size: 200%;
 	margin: 0px;
-	border: 0px;
+	border-bottom: 1px solid black;
+	color: black;
+	
 	padding: 0px;
 	padding-bottom: 20px;
+	padding-top: 10px;
 	/*background-color: #555555;*/
 }

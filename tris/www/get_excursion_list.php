@@ -41,7 +41,8 @@
 
 		$start_time =  strtotime( $row['date_start']);
 		$next_time =  strtotime( '+' . ($row['days']-1) . ' day', $start_time );
-		$date = date( "Y.m.d", $next_time);
+		$endDate = date( "Y.m.d", $next_time);
+		$startDate = date( "Y.m.d", $start_time);
 		
  		//<excursion>
 		/*$xmlExcursion = $xmlExcursions->appendChild( $xmlResult->createElement("excursion") );
@@ -55,8 +56,8 @@
 		$excursion_array[] = array(
 			"id" => $row['id'],
 			"name" => $row['name'],
-			"dateStart" => $row['date_start'],
-			"dateEnd"=> $date,
+			"dateStart" => $startDate,
+			"dateEnd"=> $endDate,
 			"days"=> $row['days'],
 			"color" => $row['color'],
 		);				

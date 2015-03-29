@@ -7,7 +7,12 @@
 	
 	$webprotocol = $ini["web"]["webprotocol"];
 	$webhost = $ini["web"]["webhost"];
-	$webpath = $ini["web"]["webpath"];	
+	$webpath = $ini["web"]["webpath"];
+
+	$mediaprotocol = $ini["web"]["webprotocol"];
+	$mediahost = $ini["web"]["webhost"];
+	$mediapath = $ini["web"]["webpath"];
+	
 	$defaultLanguage = $ini["international"]["default_language"];
 	$cookieLanguage = $ini["cookies"]["language"];
 	
@@ -37,6 +42,13 @@
 		global $webhost;
 		global $webpath;
 		return $webprotocol . $webhost . $webpath;
+	}
+	
+	function getMediaURLString(){
+		global $mediaprotocol;
+		global $mediahost;
+		global $mediapath;
+		return $mediaprotocol . $mediahost . $mediapath;
 	}
 	
 	function getTranslation($to_translate){
