@@ -682,12 +682,12 @@ SELECT pg_catalog.setval('participants_id_seq', 12, true);
 -- Data for Name: pictures; Type: TABLE DATA; Schema: public; Owner: dbuser
 --
 
-INSERT INTO pictures VALUES (11, 'Peti', 'jssor/img/landscape/04.jpg', NULL, NULL, 4, 2);
-INSERT INTO pictures VALUES (12, 'Szabi', 'jssor/img/landscape/05.jpg', NULL, NULL, 4, 2);
-INSERT INTO pictures VALUES (13, 'Erdőben', 'jssor/img/landscape/06.jpg', NULL, NULL, 4, 2);
-INSERT INTO pictures VALUES (9, 'Ez egy szép kép', 'jssor/img/landscape/02.jpg', 2, NULL, 11, 1);
-INSERT INTO pictures VALUES (10, 'Ez itt most nem is tudom micsoda', 'jssor/img/landscape/03.jpg', 1, NULL, 3, 1);
-INSERT INTO pictures VALUES (8, 'Jó hely', 'jssor/img/landscape/01.jpg', 1, NULL, 11, 1);
+INSERT INTO pictures VALUES (11, 'Peti', 'pictures/2008_08_15_retyezat2_081.jpg', NULL, NULL, 4, 2);
+INSERT INTO pictures VALUES (12, 'Szabi', 'pictures/2008_08_15_retyezat2_122.jpg', NULL, NULL, 4, 2);
+INSERT INTO pictures VALUES (13, 'Erdőben', 'pictures/2008_08_15_retyezat2_178.jpg', NULL, NULL, 4, 2);
+INSERT INTO pictures VALUES (10, 'Ez itt most nem is tudom micsoda', 'pictures/IMGP3458.JPG', 1, NULL, 3, 1);
+INSERT INTO pictures VALUES (8, 'Jó hely', 'pictures/IMGP3468.JPG', 1, NULL, 11, 1);
+INSERT INTO pictures VALUES (9, 'Ez egy szép kép', 'pictures/IMGP3448.JPG', 2, NULL, 11, 1);
 
 
 --
