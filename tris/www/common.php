@@ -16,9 +16,6 @@
 	$defaultLanguage = $ini["international"]["default_language"];
 	$cookieLanguage = $ini["cookies"]["language"];
 	
-	$language_file="translation/translation_" . getActualLanguage() . ".ini";
-	$translation = parse_ini_file( $language_file, true );
-	
 	function getActualLanguage(){
 		global $defaultLanguage;
 		global $cookieLanguage;
@@ -26,8 +23,10 @@
 		//If there is no language cookie
 		if(!isset($_COOKIE[$cookieLanguage])) {
 			
-			//then it generate it
-			setcookie( $cookieLanguage, $defaultLanguage );
+			//Nem irhatom a cookie-t mert kulonben 
+			//"cannot modify header information - headers already sent by"\
+			//uzenetet kapok
+			//setcookie( $cookieLanguage, $defaultLanguage );
 
 			return $defaultLanguage;
 			
@@ -52,7 +51,8 @@
 	}
 	
 	function getTranslation($to_translate){
-		global $translation;
+		$language_file="translation/translation_" . getActualLanguage() . ".ini";
+		$translation = parse_ini_file( $language_file, true );		
 		$translated = $translation[ $to_translate ];
 		if( empty( $translated ) ){
 			return $to_translate;

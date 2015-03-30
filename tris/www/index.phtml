@@ -21,7 +21,7 @@
 
 		<!-- On server-side generates the "var webURLString = '...'" -->		
 		<?php echo "var webURLString = '" . getWebURLString() ."';"; ?>
-	
+
 		var map;
 		var infoWindows = [];  				//For keep track of opened Info Windows
 		var excursionArray = {};
@@ -50,7 +50,14 @@
 			//
 			// Language section
 			//	
-			var language = "<?php echo getActualLanguage(); ?>";
+
+			var defaultLanguage = "<?php echo $defaultLanguage; ?>";
+			var languageKey = "<?php echo $cookieLanguage; ?>";
+			var language = getCookie( languageKey );
+			if( language == null ){
+				language = defaultLanguage;
+				setCookie(languageKey, defaultLanguage);
+			}
 			imgName = webURLString+"images/language_icons/language_" + language + ".png";	
 
 			$('#language_menu').append($('<option/>', { 
@@ -566,7 +573,7 @@
 
 				// Music links			
 				var musicObjects = data.musiclinks;
-				if( musicObjects != null ){
+				if( Object.keys(musicObjects).length > 0 ){
 					$('#details_2column table').append(
 						"<tr>" +
 							"<td valign='top'>" + "" + "</td>" + 
